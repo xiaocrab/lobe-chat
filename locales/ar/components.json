@@ -1,4 +1,9 @@
 {
+  "ArgsInput": {
+    "addArgument": "إضافة معامل",
+    "argumentPlaceholder": "المعامل {{index}}",
+    "enterFirstArgument": "أدخل المعامل الأول..."
+  },
   "DragUpload": {
     "dragDesc": "اسحب الملفات هنا، يدعم تحميل عدة صور.",
     "dragFileDesc": "اسحب الصور والملفات هنا، يدعم تحميل عدة صور وملفات.",
@@ -68,6 +73,35 @@
   "GoBack": {
     "back": "عودة"
   },
+  "HtmlPreview": {
+    "actions": {
+      "download": "تنزيل",
+      "preview": "معاينة"
+    },
+    "iframeTitle": "معاينة HTML",
+    "mode": {
+      "code": "رمز",
+      "preview": "معاينة"
+    },
+    "title": "معاينة HTML"
+  },
+  "ImageUpload": {
+    "actions": {
+      "changeImage": "انقر لتغيير الصورة",
+      "dropMultipleFiles": "لا يدعم تحميل ملفات متعددة في آن واحد، سيتم استخدام الملف الأول فقط"
+    },
+    "placeholder": {
+      "primary": "إضافة صورة",
+      "secondary": "انقر أو اسحب للإرفاق"
+    }
+  },
+  "KeyValueEditor": {
+    "addButton": "إضافة صف جديد",
+    "deleteTooltip": "حذف",
+    "duplicateKeyError": "يجب أن يكون اسم المفتاح فريدًا",
+    "keyPlaceholder": "المفتاح",
+    "valuePlaceholder": "القيمة"
+  },
   "MaxTokenSlider": {
     "unlimited": "غير محدود"
   },
@@ -76,7 +110,9 @@
       "custom": "نموذج مخصص، الإعداد الافتراضي يدعم الاستدعاء الوظيفي والتعرف البصري، يرجى التحقق من قدرة النموذج على القيام بذلك بناءً على الحالة الفعلية",
       "file": "يدعم هذا النموذج قراءة وتعرف الملفات المرفوعة",
       "functionCall": "يدعم هذا النموذج استدعاء الوظائف",
+      "imageOutput": "يدعم هذا النموذج إنشاء الصور",
       "reasoning": "يدعم هذا النموذج التفكير العميق",
+      "search": "يدعم هذا النموذج البحث عبر الإنترنت",
       "tokens": "يدعم هذا النموذج حتى {{tokens}} رمزًا في جلسة واحدة",
       "vision": "يدعم هذا النموذج التعرف البصري"
     },
@@ -84,9 +120,41 @@
   },
   "ModelSwitchPanel": {
     "emptyModel": "لا توجد نماذج ممكن تمكينها، يرجى الانتقال إلى الإعدادات لتمكينها",
-    "provider": "مزود"
+    "emptyProvider": "لا توجد مزودات مفعلة، يرجى الذهاب إلى الإعدادات لتفعيلها",
+    "goToSettings": "اذهب إلى الإعدادات",
+    "provider": "مزود",
+    "title": "نموذج"
+  },
+  "MultiImagesUpload": {
+    "actions": {
+      "uploadMore": "انقر أو اسحب لإضافة المزيد"
+    },
+    "modal": {
+      "complete": "اكتمل",
+      "newFileIndicator": "جديد",
+      "selectImageToPreview": "يرجى اختيار صورة للمعاينة",
+      "title": "إدارة الصور ({{count}})",
+      "upload": "تحميل الصور"
+    },
+    "placeholder": {
+      "primary": "انقر أو اسحب لتحميل الصور",
+      "secondary": "يدعم اختيار عدة صور"
+    },
+    "progress": {
+      "uploadingWithCount": "تم تحميل {{completed}} من أصل {{total}}"
+    },
+    "validation": {
+      "fileSizeExceeded": "تجاوز حجم الملف الحد المسموح به",
+      "fileSizeExceededDetail": "{{fileName}} ({{actualSize}}) يتجاوز الحد الأقصى للحجم وهو {{maxSize}}",
+      "fileSizeExceededMultiple": "{{count}} من الملفات تتجاوز الحد الأقصى للحجم {{maxSize}}: {{fileList}}",
+      "imageCountExceeded": "تجاوز عدد الصور الحد المسموح به"
+    }
   },
   "OllamaSetupGuide": {
+    "action": {
+      "close": "إغلاق الإشعار",
+      "start": "تم التثبيت والتشغيل، ابدأ المحادثة"
+    },
     "cors": {
       "description": "بسبب قيود أمان المتصفح، تحتاج إلى تكوين CORS لـ Ollama لاستخدامه بشكل صحيح.",
       "linux": {

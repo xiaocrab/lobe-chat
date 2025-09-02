@@ -19,6 +19,24 @@
       "title": "API 키"
     }
   },
+  "azureai": {
+    "azureApiVersion": {
+      "desc": "Azure API 버전, YYYY-MM-DD 형식을 따릅니다. [최신 버전](https://learn.microsoft.com/zh-cn/azure/ai-services/openai/reference#chat-completions)을 참조하세요.",
+      "fetch": "목록 가져오기",
+      "title": "Azure API 버전"
+    },
+    "endpoint": {
+      "desc": "Azure AI 프로젝트 개요에서 Azure AI 모델 추론 엔드포인트를 찾습니다.",
+      "placeholder": "https://ai-userxxxxxxxxxx.services.ai.azure.com/models",
+      "title": "Azure AI 엔드포인트"
+    },
+    "title": "Azure OpenAI",
+    "token": {
+      "desc": "Azure AI 프로젝트 개요에서 API 키를 찾습니다.",
+      "placeholder": "Azure 키",
+      "title": "키"
+    }
+  },
   "bedrock": {
     "accessKeyId": {
       "desc": "AWS 액세스 키 ID를 입력하세요.",
@@ -48,6 +66,7 @@
       "customRegion": "사용자 정의 서비스 지역",
       "customSessionToken": "사용자 정의 세션 토큰",
       "description": "AWS AccessKeyId / SecretAccessKey를 입력하면 세션이 시작됩니다. 애플리케이션은 인증 구성을 기록하지 않습니다.",
+      "imageGenerationDescription": "AWS AccessKeyId / SecretAccessKey를 입력하면 생성이 시작됩니다. 애플리케이션은 인증 구성을 기록하지 않습니다.",
       "title": "사용자 정의 Bedrock 인증 정보 사용"
     }
   },
@@ -66,7 +85,6 @@
   "createNewAiProvider": {
     "apiKey": {
       "placeholder": "API 키를 입력하세요",
-      "required": "API 키를 입력하세요",
       "title": "API 키"
     },
     "basicTitle": "기본 정보",
@@ -94,10 +112,11 @@
       "title": "서비스 제공자 이름"
     },
     "proxyUrl": {
-      "placeholder": "요청 주소를 입력하세요, 입력하지 않으면 SDK의 요청 주소가 사용됩니다",
+      "required": "프록시 주소를 입력하세요",
       "title": "프록시 주소"
     },
     "sdkType": {
+      "placeholder": "openai/anthropic/azureai/ollama/...",
       "required": "SDK 유형을 선택하세요",
       "title": "요청 형식"
     },
@@ -146,6 +165,7 @@
     },
     "download": {
       "desc": "Ollama가 모델을 다운로드하고 있습니다. 이 페이지를 닫지 마세요. 다시 다운로드할 경우 중단된 지점에서 계속됩니다.",
+      "failed": "모델 다운로드에 실패했습니다. 네트워크 또는 Ollama 설정을 확인한 후 다시 시도해 주세요.",
       "remainingTime": "남은 시간",
       "speed": "다운로드 속도",
       "title": "모델 {{model}} 다운로드 중"
@@ -169,6 +189,7 @@
       "aesGcm": "귀하의 비밀 키와 프록시 주소 등은 <1>AES-GCM</1> 암호화 알고리즘을 사용하여 암호화됩니다",
       "apiKey": {
         "desc": "{{name}} API 키를 입력하세요",
+        "descWithUrl": "{{name}} API 키를 입력하세요. <3>여기를 클릭하여 받기</3>",
         "placeholder": "{{name}} API 키",
         "title": "API 키"
       },
@@ -189,6 +210,10 @@
         "title": "클라이언트 요청 모드 사용"
       },
       "helpDoc": "설정 가이드",
+      "responsesApi": {
+        "desc": "OpenAI의 최신 요청 형식 규격을 사용하여 사고 연결 등 고급 기능을 활성화합니다",
+        "title": "Responses API 규격 사용"
+      },
       "waitingForMore": "더 많은 모델이 <1>계획 중</1>입니다. 기대해 주세요"
     },
     "createNew": {
@@ -209,6 +234,11 @@
         "azureDeployName": {
           "extra": "Azure OpenAI에서 실제 요청되는 필드",
           "placeholder": "Azure에서 모델 배포 이름을 입력하세요",
+          "title": "모델 배포 이름"
+        },
+        "deployName": {
+          "extra": "요청을 보낼 때 이 필드가 모델 ID로 사용됩니다.",
+          "placeholder": "모델 실제 배포 이름 또는 ID를 입력하세요.",
           "title": "모델 배포 이름"
         },
         "displayName": {
@@ -276,12 +306,26 @@
         "latestTime": "마지막 업데이트 시간: {{time}}",
         "noLatestTime": "아직 목록을 가져오지 않았습니다."
       },
+      "noModelsInCategory": "이 카테고리에는 활성화된 모델이 없습니다",
+      "resetAll": {
+        "conform": "현재 모델의 모든 수정을 초기화하시겠습니까? 초기화 후 현재 모델 목록은 기본 상태로 돌아갑니다.",
+        "success": "초기화 성공",
+        "title": "모든 수정 초기화"
+      },
       "search": "모델 검색...",
       "searchResult": "{{count}} 개의 모델이 검색되었습니다",
       "title": "모델 목록",
       "total": "사용 가능한 모델 총 {{count}} 개"
     },
-    "searchNotFound": "검색 결과를 찾을 수 없습니다"
+    "searchNotFound": "검색 결과를 찾을 수 없습니다",
+    "tabs": {
+      "all": "전체",
+      "chat": "대화",
+      "embedding": "임베딩",
+      "image": "이미지",
+      "stt": "음성 인식",
+      "tts": "음성 합성"
+    }
   },
   "sortModal": {
     "success": "정렬 업데이트 성공",
@@ -293,6 +337,16 @@
     "deleteSuccess": "삭제 성공",
     "tooltip": "서비스 제공자 기본 설정 업데이트",
     "updateSuccess": "업데이트 성공"
+  },
+  "updateCustomAiProvider": {
+    "title": "사용자 정의 AI 서비스 제공자 구성 업데이트"
+  },
+  "vertexai": {
+    "apiKey": {
+      "desc": "당신의 Vertex AI 키를 입력하세요",
+      "placeholder": "{ \"type\": \"service_account\", \"project_id\": \"xxx\", \"private_key_id\": ... }",
+      "title": "Vertex AI 키"
+    }
   },
   "zeroone": {
     "title": "01.AI Zero One All Things"

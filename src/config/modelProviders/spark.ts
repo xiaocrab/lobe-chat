@@ -69,15 +69,16 @@ const Spark: ModelProviderCard = {
   modelsUrl: 'https://xinghuo.xfyun.cn/spark',
   name: 'Spark',
   settings: {
-    sdkType: 'openai',
-    smoothing: {
-      speed: 2,
-      text: true,
+    disableBrowserRequest: true,
+    proxyUrl: {
+      placeholder: 'https://spark-api-open.xf-yun.com/v1',
     },
-  },
-  smoothing: {
-    speed: 2,
-    text: true,
+    responseAnimation: {
+      speed: 2,
+      text: 'smooth',
+    },
+    sdkType: 'openai',
+    showModelFetcher: false,
   },
   url: 'https://www.xfyun.cn',
 };

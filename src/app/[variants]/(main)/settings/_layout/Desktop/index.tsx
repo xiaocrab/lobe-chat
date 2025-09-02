@@ -1,51 +1,49 @@
 'use client';
 
-import { Tag } from 'antd';
-import { useResponsive } from 'antd-style';
-import { memo, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useResponsive, useTheme } from 'antd-style';
+import { usePathname } from 'next/navigation';
+import { PropsWithChildren, memo, useRef } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import InitClientDB from '@/features/InitClientDB';
 import Footer from '@/features/Setting/Footer';
 import SettingContainer from '@/features/Setting/SettingContainer';
-import { useActiveSettingsKey } from '@/hooks/useActiveTabKey';
-import { SettingsTabs } from '@/store/global/initialState';
 
 import { LayoutProps } from '../type';
 import Header from './Header';
 import SideBar from './SideBar';
 
+const SKIP_PATHS = ['/settings/provider', '/settings/agent'];
+
+const ContentContainer = memo<PropsWithChildren>(({ children }) => {
+  const pathname = usePathname();
+  const isSkip = SKIP_PATHS.some((path) => pathname.includes(path));
+
+  return isSkip ? (
+    children
+  ) : (
+    <SettingContainer addonAfter={<Footer />}>{children}</SettingContainer>
+  );
+});
+
 const Layout = memo<LayoutProps>(({ children, category }) => {
   const ref = useRef<any>(null);
   const { md = true } = useResponsive();
-  const { t } = useTranslation('setting');
-  const activeKey = useActiveSettingsKey();
+  const theme = useTheme();
 
   return (
     <Flexbox
       height={'100%'}
       horizontal={md}
       ref={ref}
-      style={{ position: 'relative' }}
-      width={'100%'}
+      style={{ background: theme.colorBgContainer, flex: '1', position: 'relative' }}
     >
       {md ? (
         <SideBar>{category}</SideBar>
       ) : (
-        <Header
-          getContainer={() => ref.current}
-          title={
-            <>
-              {t(`tab.${activeKey}`)}
-              {activeKey === SettingsTabs.Sync && <Tag color={'gold'}>{t('tab.experiment')}</Tag>}
-            </>
-          }
-        >
-          {category}
-        </Header>
+        <Header getContainer={() => ref.current!}>{category}</Header>
       )}
-      <SettingContainer addonAfter={<Footer />}>{children}</SettingContainer>
+      <ContentContainer>{children}</ContentContainer>
       <InitClientDB />
     </Flexbox>
   );

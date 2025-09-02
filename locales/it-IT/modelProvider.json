@@ -19,6 +19,24 @@
       "title": "Chiave API"
     }
   },
+  "azureai": {
+    "azureApiVersion": {
+      "desc": "Versione API di Azure, seguendo il formato YYYY-MM-DD, consulta [l'ultima versione](https://learn.microsoft.com/zh-cn/azure/ai-services/openai/reference#chat-completions)",
+      "fetch": "Ottieni elenco",
+      "title": "Versione API di Azure"
+    },
+    "endpoint": {
+      "desc": "Trova l'endpoint di inferenza del modello Azure AI nella panoramica del progetto Azure AI",
+      "placeholder": "https://ai-userxxxxxxxxxx.services.ai.azure.com/models",
+      "title": "Endpoint di Azure AI"
+    },
+    "title": "Azure OpenAI",
+    "token": {
+      "desc": "Trova la chiave API nella panoramica del progetto Azure AI",
+      "placeholder": "Chiave Azure",
+      "title": "Chiave"
+    }
+  },
   "bedrock": {
     "accessKeyId": {
       "desc": "Inserisci l'ID chiave di accesso AWS",
@@ -48,6 +66,7 @@
       "customRegion": "Regione del servizio personalizzata",
       "customSessionToken": "Token di sessione personalizzato",
       "description": "Inserisci la tua chiave di accesso AWS AccessKeyId / SecretAccessKey per avviare la sessione. L'applicazione non memorizzerà la tua configurazione di autenticazione",
+      "imageGenerationDescription": "Inserisci il tuo AWS AccessKeyId / SecretAccessKey per iniziare a generare. L'applicazione non registrerà le tue credenziali di autenticazione",
       "title": "Usa le informazioni di autenticazione Bedrock personalizzate"
     }
   },
@@ -66,7 +85,6 @@
   "createNewAiProvider": {
     "apiKey": {
       "placeholder": "Inserisci la tua API Key",
-      "required": "Inserisci la tua API Key",
       "title": "API Key"
     },
     "basicTitle": "Informazioni di base",
@@ -94,10 +112,11 @@
       "title": "Nome del fornitore"
     },
     "proxyUrl": {
-      "placeholder": "Inserisci il tuo indirizzo di richiesta, se non specificato verrà utilizzato l'indirizzo di richiesta corrispondente all'SDK",
+      "required": "Inserisci l'indirizzo del proxy",
       "title": "Indirizzo proxy"
     },
     "sdkType": {
+      "placeholder": "openai/anthropic/azureai/ollama/...",
       "required": "Seleziona il tipo di SDK",
       "title": "Formato della richiesta"
     },
@@ -146,6 +165,7 @@
     },
     "download": {
       "desc": "Ollama sta scaricando questo modello, per favore non chiudere questa pagina. Il download verrà interrotto e riprenderà dal punto in cui si è interrotto in caso di riavvio.",
+      "failed": "Download del modello fallito, controlla la rete o le impostazioni di Ollama e riprova",
       "remainingTime": "Tempo rimanente",
       "speed": "Velocità di download",
       "title": "Download del modello in corso {{model}}"
@@ -169,6 +189,7 @@
       "aesGcm": "La tua chiave e l'indirizzo proxy saranno crittografati utilizzando l'algoritmo di crittografia <1>AES-GCM</1>",
       "apiKey": {
         "desc": "Inserisci la tua {{name}} API Key",
+        "descWithUrl": "Per favore inserisci la tua API Key di {{name}}, <3>clicca qui per ottenerla</3>",
         "placeholder": "{{name}} API Key",
         "title": "API Key"
       },
@@ -189,6 +210,10 @@
         "title": "Utilizza la modalità di richiesta client"
       },
       "helpDoc": "Guida alla configurazione",
+      "responsesApi": {
+        "desc": "Utilizza il nuovo formato di richiesta di OpenAI per sbloccare funzionalità avanzate come la catena di pensiero",
+        "title": "Utilizza lo standard Responses API"
+      },
       "waitingForMore": "Altri modelli sono in fase di <1>implementazione</1>, resta sintonizzato"
     },
     "createNew": {
@@ -209,6 +234,11 @@
         "azureDeployName": {
           "extra": "Campo effettivamente richiesto in Azure OpenAI",
           "placeholder": "Inserisci il nome di distribuzione del modello in Azure",
+          "title": "Nome di distribuzione del modello"
+        },
+        "deployName": {
+          "extra": "Questo campo verrà utilizzato come ID del modello quando si invia la richiesta",
+          "placeholder": "Inserisci il nome o l'ID effettivo del modello distribuito",
           "title": "Nome di distribuzione del modello"
         },
         "displayName": {
@@ -276,12 +306,26 @@
         "latestTime": "Ultimo aggiornamento: {{time}}",
         "noLatestTime": "Nessun elenco recuperato finora"
       },
+      "noModelsInCategory": "Nessun modello abilitato in questa categoria",
+      "resetAll": {
+        "conform": "Sei sicuro di voler ripristinare tutte le modifiche al modello corrente? Dopo il ripristino, l'elenco dei modelli correnti tornerà allo stato predefinito",
+        "success": "Ripristino avvenuto con successo",
+        "title": "Ripristina tutte le modifiche"
+      },
       "search": "Cerca modelli...",
       "searchResult": "Trovati {{count}} modelli",
       "title": "Elenco dei modelli",
       "total": "Totale di {{count}} modelli disponibili"
     },
-    "searchNotFound": "Nessun risultato trovato"
+    "searchNotFound": "Nessun risultato trovato",
+    "tabs": {
+      "all": "Tutti",
+      "chat": "Chat",
+      "embedding": "Incorporamento",
+      "image": "Immagine",
+      "stt": "Riconoscimento vocale (ASR)",
+      "tts": "Sintesi vocale (TTS)"
+    }
   },
   "sortModal": {
     "success": "Ordinamento aggiornato con successo",
@@ -293,6 +337,16 @@
     "deleteSuccess": "Eliminazione avvenuta con successo",
     "tooltip": "Aggiorna la configurazione di base del fornitore",
     "updateSuccess": "Aggiornamento avvenuto con successo"
+  },
+  "updateCustomAiProvider": {
+    "title": "Aggiorna la configurazione del fornitore di AI personalizzato"
+  },
+  "vertexai": {
+    "apiKey": {
+      "desc": "Inserisci le tue chiavi Vertex AI",
+      "placeholder": "{ \"type\": \"service_account\", \"project_id\": \"xxx\", \"private_key_id\": ... }",
+      "title": "Chiavi Vertex AI"
+    }
   },
   "zeroone": {
     "title": "01.AI ZeroOne"

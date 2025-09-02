@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { DeepPartial } from 'utility-types';
+import type { PartialDeep } from 'type-fest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { clientDB, initializeDB } from '@/database/client/db';
@@ -54,7 +54,7 @@ describe('ClientService', () => {
   });
 
   it('should update user settings correctly', async () => {
-    const settingsPatch: DeepPartial<UserSettings> = { general: { themeMode: 'dark' } };
+    const settingsPatch: PartialDeep<UserSettings> = { general: { fontSize: 12 } };
 
     await clientService.updateUserSettings(settingsPatch);
 
@@ -94,5 +94,15 @@ describe('ClientService', () => {
 
     expect(spyOn).toHaveBeenCalledWith(newPreference);
     expect(spyOn).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return empty array for getUserSSOProviders', async () => {
+    const providers = await clientService.getUserSSOProviders();
+    expect(providers).toEqual([]);
+  });
+
+  it('should do nothing when unlinkSSOProvider is called', async () => {
+    const result = await clientService.unlinkSSOProvider('google', '123');
+    expect(result).toBeUndefined();
   });
 });

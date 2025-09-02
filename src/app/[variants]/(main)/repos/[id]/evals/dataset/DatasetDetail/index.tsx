@@ -1,8 +1,9 @@
 'use client';
 
 import { ProColumns, ProTable } from '@ant-design/pro-components';
-import { ActionIcon } from '@lobehub/ui';
-import { Button, Typography, Upload } from 'antd';
+import { EvalDatasetRecordRefFile } from '@lobechat/types';
+import { ActionIcon, Button, Text } from '@lobehub/ui';
+import { Upload } from 'antd';
 import { createStyles } from 'antd-style';
 import { Edit2Icon, Trash2Icon } from 'lucide-react';
 import { parseAsInteger, useQueryState } from 'nuqs';
@@ -12,7 +13,6 @@ import { Center, Flexbox } from 'react-layout-kit';
 import FileIcon from '@/components/FileIcon';
 import { ragEvalService } from '@/services/ragEval';
 import { useKnowledgeBaseStore } from '@/store/knowledgeBase';
-import { EvalDatasetRecordRefFile } from '@/types/eval';
 
 const createRequest = (activeDatasetId: number) => async () => {
   const records = await ragEvalService.getDatasetRecords(activeDatasetId);
@@ -64,7 +64,7 @@ const DatasetDetail = () => {
               {referenceFiles?.map((file) => (
                 <Flexbox gap={4} horizontal key={file.id}>
                   <FileIcon fileName={file.name} fileType={file.fileType} size={20} />
-                  <Typography.Text ellipsis={{ tooltip: true }}>{file.name}</Typography.Text>
+                  <Text ellipsis={{ tooltip: true }}>{file.name}</Text>
                 </Flexbox>
               ))}
             </Flexbox>

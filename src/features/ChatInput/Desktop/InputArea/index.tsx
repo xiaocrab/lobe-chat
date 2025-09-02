@@ -2,10 +2,13 @@ import { TextArea } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { TextAreaRef } from 'antd/es/input/TextArea';
 import { RefObject, memo, useEffect, useRef } from 'react';
+import { useHotkeysContext } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
+import { isDesktop } from '@/const/version';
 import { useUserStore } from '@/store/user';
 import { preferenceSelectors } from '@/store/user/selectors';
+import { HotkeyEnum } from '@/types/hotkey';
 import { isCommandPressed } from '@/utils/keyboard';
 
 import { useAutoFocus } from '../useAutoFocus';
@@ -17,7 +20,7 @@ const useStyles = createStyles(({ css }) => {
 
       height: 100% !important;
       padding-block: 0;
-      padding-inline: 24px;
+      padding-inline: 16px;
 
       line-height: 1.5;
 
@@ -38,8 +41,10 @@ interface InputAreaProps {
 }
 
 const InputArea = memo<InputAreaProps>(({ onSend, value, loading, onChange }) => {
+  const { enableScope, disableScope } = useHotkeysContext();
   const { t } = useTranslation('chat');
   const { styles } = useStyles();
+
   const ref = useRef<TextAreaRef>(null);
   const isChineseInput = useRef(false);
 
@@ -71,6 +76,7 @@ const InputArea = memo<InputAreaProps>(({ onSend, value, loading, onChange }) =>
         className={styles.textarea}
         onBlur={(e) => {
           onChange?.(e.target.value);
+          disableScope(HotkeyEnum.AddUserMessage);
         }}
         onChange={(e) => {
           onChange?.(e.target.value);
@@ -80,6 +86,22 @@ const InputArea = memo<InputAreaProps>(({ onSend, value, loading, onChange }) =>
         }}
         onCompositionStart={() => {
           isChineseInput.current = true;
+        }}
+        onContextMenu={async (e) => {
+          if (isDesktop) {
+            e.preventDefault();
+            const textArea = ref.current?.resizableTextArea?.textArea;
+            const hasSelection = textArea && textArea.selectionStart !== textArea.selectionEnd;
+            const { electronSystemService } = await import('@/services/electron/system');
+
+            electronSystemService.showContextMenu('editor', {
+              hasSelection: !!hasSelection,
+              value: value,
+            });
+          }
+        }}
+        onFocus={() => {
+          enableScope(HotkeyEnum.AddUserMessage);
         }}
         onPressEnter={(e) => {
           if (loading || e.altKey || e.shiftKey || isChineseInput.current) return;
@@ -109,8 +131,8 @@ const InputArea = memo<InputAreaProps>(({ onSend, value, loading, onChange }) =>
         }}
         placeholder={t('sendPlaceholder')}
         ref={ref}
-        type={'pure'}
         value={value}
+        variant={'borderless'}
       />
     </div>
   );

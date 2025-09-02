@@ -1,22 +1,23 @@
 import isEqual from 'fast-deep-equal';
+import {
+  AiModelSortMap,
+  AiProviderModelListItem,
+  CreateAiModelParams,
+  ToggleAiModelEnableParams,
+} from 'model-bank';
 import { SWRResponse, mutate } from 'swr';
 import { StateCreator } from 'zustand/vanilla';
 
 import { useClientDataSWR } from '@/libs/swr';
 import { aiModelService } from '@/services/aiModel';
 import { AiInfraStore } from '@/store/aiInfra/store';
-import {
-  AiModelSortMap,
-  AiProviderModelListItem,
-  CreateAiModelParams,
-  ToggleAiModelEnableParams,
-} from '@/types/aiModel';
 
 const FETCH_AI_PROVIDER_MODEL_LIST_KEY = 'FETCH_AI_PROVIDER_MODELS';
 
 export interface AiModelAction {
   batchToggleAiModels: (ids: string[], enabled: boolean) => Promise<void>;
   batchUpdateAiModels: (models: AiProviderModelListItem[]) => Promise<void>;
+  clearModelsByProvider: (provider: string) => Promise<void>;
   clearRemoteModels: (provider: string) => Promise<void>;
   createNewAiModel: (params: CreateAiModelParams) => Promise<void>;
   fetchRemoteModelList: (providerId: string) => Promise<void>;
@@ -55,6 +56,10 @@ export const createAiModelSlice: StateCreator<
     await aiModelService.batchUpdateAiModels(id, models);
     await get().refreshAiModelList();
   },
+  clearModelsByProvider: async (provider) => {
+    await aiModelService.clearModelsByProvider(provider);
+    await get().refreshAiModelList();
+  },
   clearRemoteModels: async (provider) => {
     await aiModelService.clearRemoteModels(provider);
     await get().refreshAiModelList();
@@ -66,7 +71,7 @@ export const createAiModelSlice: StateCreator<
   fetchRemoteModelList: async (providerId) => {
     const { modelsService } = await import('@/services/models');
 
-    const data = await modelsService.getChatModels(providerId);
+    const data = await modelsService.getModels(providerId);
     if (data) {
       await get().batchUpdateAiModels(
         data.map((model) => ({
@@ -79,7 +84,7 @@ export const createAiModelSlice: StateCreator<
           },
           enabled: model.enabled || false,
           source: 'remote',
-          type: 'chat',
+          type: model.type || 'chat',
         })),
       );
 

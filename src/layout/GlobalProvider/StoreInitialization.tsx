@@ -7,7 +7,6 @@ import { createStoreUpdater } from 'zustand-utils';
 
 import { enableNextAuth } from '@/const/auth';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { useEnabledDataSync } from '@/hooks/useSyncData';
 import { useAgentStore } from '@/store/agent';
 import { useAiInfraStore } from '@/store/aiInfra';
 import { useGlobalStore } from '@/store/global';
@@ -32,7 +31,7 @@ const StoreInitialization = memo(() => {
 
   const useInitSystemStatus = useGlobalStore((s) => s.useInitSystemStatus);
 
-  const useInitAgentStore = useAgentStore((s) => s.useInitAgentStore);
+  const useInitAgentStore = useAgentStore((s) => s.useInitInboxAgentStore);
   const useInitAiProviderKeyVaults = useAiInfraStore((s) => s.useFetchAiProviderRuntimeState);
 
   // init the system preference
@@ -69,8 +68,6 @@ const StoreInitialization = memo(() => {
       }
     },
   });
-
-  useEnabledDataSync();
 
   const useStoreUpdater = createStoreUpdater(useGlobalStore);
 

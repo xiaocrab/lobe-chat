@@ -16,6 +16,12 @@ vi.mock('next/navigation', () => ({
     replace: vi.fn((href) => href),
   })),
 }));
+vi.mock('nextjs-toploader/app', () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn((href) => href),
+    replace: vi.fn((href) => href),
+  })),
+}));
 vi.mock('@/hooks/useQuery', () => ({
   useQuery: vi.fn(() => ({})),
 }));
@@ -43,7 +49,7 @@ describe('useOpenChatSettings', () => {
     vi.mocked(useSessionStore).mockReturnValue('123');
     vi.mocked(useIsMobile).mockReturnValue(true);
     const { result } = renderHook(() => useOpenChatSettings(ChatSettingsTabs.Meta));
-    expect(result.current()).toBe('/chat/settings');
+    expect(result.current()).toBe('/chat/settings?session=123');
   });
 
   it('should handle desktop route for chat settings with session and tab', () => {

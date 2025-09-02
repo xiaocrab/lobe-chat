@@ -5,7 +5,7 @@ import {
   CreateAiModelParams,
   ToggleAiModelEnableParams,
   UpdateAiModelParams,
-} from '@/types/aiModel';
+} from 'model-bank';
 
 export interface IAiModelService {
   createAiModel: (params: CreateAiModelParams) => Promise<any>;
@@ -23,6 +23,8 @@ export interface IAiModelService {
   batchToggleAiModels: (id: string, models: string[], enabled: boolean) => Promise<any>;
 
   clearRemoteModels: (providerId: string) => Promise<any>;
+
+  clearModelsByProvider: (providerId: string) => Promise<any>;
 
   updateAiModelOrder: (providerId: string, items: AiModelSortMap[]) => Promise<any>;
 

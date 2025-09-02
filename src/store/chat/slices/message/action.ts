@@ -1,11 +1,11 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix, typescript-sort-keys/interface */
 // Disable the auto sort key eslint rule to make the code more logic and readable
+import { ChatErrorType, TraceEventType } from '@lobechat/types';
 import { copyToClipboard } from '@lobehub/ui';
 import isEqual from 'fast-deep-equal';
 import { SWRResponse, mutate } from 'swr';
 import { StateCreator } from 'zustand/vanilla';
 
-import { TraceEventType } from '@/const/trace';
 import { useClientDataSWR } from '@/libs/swr';
 import { messageService } from '@/services/message';
 import { topicService } from '@/services/topic';
@@ -15,12 +15,16 @@ import { messageMapKey } from '@/store/chat/utils/messageMapKey';
 import {
   ChatMessage,
   ChatMessageError,
+  ChatMessagePluginError,
   CreateMessageParams,
+  MessageMetadata,
   MessageToolCall,
   ModelReasoning,
 } from '@/types/message';
+import { ChatImageItem } from '@/types/message/image';
+import { GroundingSearch } from '@/types/search';
 import { TraceEventPayloads } from '@/types/trace';
-import { setNamespace } from '@/utils/storeDebug';
+import { Action, setNamespace } from '@/utils/storeDebug';
 import { nanoid } from '@/utils/uuid';
 
 import type { ChatStoreState } from '../../initialState';
@@ -73,20 +77,31 @@ export interface ChatMessageAction {
   internal_updateMessageContent: (
     id: string,
     content: string,
-    toolCalls?: MessageToolCall[],
-    reasoning?: ModelReasoning,
+    extra?: {
+      toolCalls?: MessageToolCall[];
+      reasoning?: ModelReasoning;
+      search?: GroundingSearch;
+      metadata?: MessageMetadata;
+      imageList?: ChatImageItem[];
+      model?: string;
+      provider?: string;
+    },
   ) => Promise<void>;
   /**
    * update the message error with optimistic update
    */
   internal_updateMessageError: (id: string, error: ChatMessageError | null) => Promise<void>;
+  internal_updateMessagePluginError: (
+    id: string,
+    error: ChatMessagePluginError | null,
+  ) => Promise<void>;
   /**
    * create a message with optimistic update
    */
   internal_createMessage: (
     params: CreateMessageParams,
     context?: { tempMessageId?: string; skipRefresh?: boolean },
-  ) => Promise<string>;
+  ) => Promise<string | undefined>;
   /**
    * create a temp message for optimistic update
    * otherwise the message will be too slow to show
@@ -114,7 +129,7 @@ export interface ChatMessageAction {
     key: keyof ChatStoreState,
     loading: boolean,
     id?: string,
-    action?: string,
+    action?: Action,
   ) => AbortController | undefined;
 }
 
@@ -272,32 +287,52 @@ export const chatMessage: StateCreator<
     await messageService.updateMessage(id, { error });
     await get().refreshMessages();
   },
-  internal_updateMessageContent: async (id, content, toolCalls, reasoning) => {
+
+  internal_updateMessagePluginError: async (id, error) => {
+    await messageService.updateMessagePluginError(id, error);
+    await get().refreshMessages();
+  },
+
+  internal_updateMessageContent: async (id, content, extra) => {
     const { internal_dispatchMessage, refreshMessages, internal_transformToolCalls } = get();
 
     // Due to the async update method and refresh need about 100ms
     // we need to update the message content at the frontend to avoid the update flick
     // refs: https://medium.com/@kyledeguzmanx/what-are-optimistic-updates-483662c3e171
-    if (toolCalls) {
+    if (extra?.toolCalls) {
       internal_dispatchMessage({
         id,
         type: 'updateMessage',
-        value: { tools: internal_transformToolCalls(toolCalls) },
+        value: { tools: internal_transformToolCalls(extra?.toolCalls) },
       });
     } else {
-      internal_dispatchMessage({ id, type: 'updateMessage', value: { content } });
+      internal_dispatchMessage({
+        id,
+        type: 'updateMessage',
+        value: { content },
+      });
     }
 
     await messageService.updateMessage(id, {
       content,
-      tools: toolCalls ? internal_transformToolCalls(toolCalls) : undefined,
-      reasoning,
+      tools: extra?.toolCalls ? internal_transformToolCalls(extra?.toolCalls) : undefined,
+      reasoning: extra?.reasoning,
+      search: extra?.search,
+      metadata: extra?.metadata,
+      model: extra?.model,
+      provider: extra?.provider,
+      imageList: extra?.imageList,
     });
     await refreshMessages();
   },
 
   internal_createMessage: async (message, context) => {
-    const { internal_createTmpMessage, refreshMessages, internal_toggleMessageLoading } = get();
+    const {
+      internal_createTmpMessage,
+      refreshMessages,
+      internal_toggleMessageLoading,
+      internal_dispatchMessage,
+    } = get();
     let tempId = context?.tempMessageId;
     if (!tempId) {
       // use optimistic update to avoid the slow waiting
@@ -306,14 +341,25 @@ export const chatMessage: StateCreator<
       internal_toggleMessageLoading(true, tempId);
     }
 
-    const id = await messageService.createMessage(message);
-    if (!context?.skipRefresh) {
-      internal_toggleMessageLoading(true, tempId);
-      await refreshMessages();
-    }
+    try {
+      const id = await messageService.createMessage(message);
+      if (!context?.skipRefresh) {
+        internal_toggleMessageLoading(true, tempId);
+        await refreshMessages();
+      }
 
-    internal_toggleMessageLoading(false, tempId);
-    return id;
+      internal_toggleMessageLoading(false, tempId);
+      return id;
+    } catch (e) {
+      internal_toggleMessageLoading(false, tempId);
+      internal_dispatchMessage({
+        id: tempId,
+        type: 'updateMessage',
+        value: {
+          error: { type: ChatErrorType.CreateMessageError, message: (e as Error).message, body: e },
+        },
+      });
+    }
   },
 
   internal_fetchMessages: async () => {
@@ -364,7 +410,7 @@ export const chatMessage: StateCreator<
         messageLoadingIds: toggleBooleanList(get().messageLoadingIds, id, loading),
       },
       false,
-      'internal_toggleMessageLoading',
+      `internal_toggleMessageLoading/${loading ? 'start' : 'end'}`,
     );
   },
   internal_toggleLoadingArrays: (key, loading, id, action) => {

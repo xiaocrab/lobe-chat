@@ -16,6 +16,16 @@ export default {
     detail: '错误详情',
     title: '请求失败',
   },
+  import: {
+    importConfigFile: {
+      description: '出错原因: {{reason}}',
+      title: '导入失败',
+    },
+    incompatible: {
+      description: '该文件由更高版本导出，请尝试升级到最新版本后再重新导入',
+      title: '当前应用不支持导入该文件',
+    },
+  },
   loginRequired: {
     desc: '即将自动跳转到登录页面',
     title: '请登录后使用该功能',
@@ -56,6 +66,7 @@ export default {
     429: '很抱歉，您的请求太多，服务器有点累了，请稍后再试',
     431: '很抱歉，您的请求头字段太大，服务器无法处理',
     451: '很抱歉，由于法律原因，服务器拒绝提供此资源',
+    499: '很抱歉，您的请求在服务器处理中被意外中断，可能是因为您主动取消了操作或网络连接不稳定。请检查网络状况后重试。',
     500: '很抱歉，服务器似乎遇到了一些困难，暂时无法完成您的请求，请稍后再试',
     501: '很抱歉，服务器还不知道如何处理这个请求，请确认您的操作是否正确',
     502: '很抱歉，服务器似乎迷失了方向，暂时无法提供服务，请稍后再试',
@@ -66,6 +77,8 @@ export default {
     507: '很抱歉，服务器存储空间不足，无法处理您的请求，请稍后再试',
     509: '很抱歉，服务器的带宽已用尽，请稍后再试',
     510: '很抱歉，服务器不支持请求的扩展功能，请联系管理员',
+    520: '很抱歉，服务器遇到了一个意外的问题，导致无法完成您的请求。请稍后再试，我们正努力解决这个问题。',
+    522: '很抱歉，服务器连接超时，未能及时响应您的请求。可能是网络不稳定或服务器暂时无法访问。请稍后再试，我们正在努力恢复服务。',
     524: '很抱歉，服务器在等回复时超时了，可能是因为响应太慢，请稍后再试',
 
     /* eslint-disable sort-keys-fix/sort-keys-fix */
@@ -90,22 +103,41 @@ export default {
 
     InvalidAccessCode: '密码不正确或为空，请输入正确的访问密码，或者添加自定义 API Key',
     InvalidClerkUser: '很抱歉，你当前尚未登录，请先登录或注册账号后继续操作',
+    SystemTimeNotMatchError: '很抱歉，您的系统时间和服务器不匹配，请检查您的系统时间后重试',
+    SubscriptionKeyMismatch:
+      '很抱歉，由于系统偶发故障，当前订阅用量暂时失效，请点击下方按钮恢复订阅，或邮件联系我们获取支持',
+    CreateMessageError:
+      '很抱歉，消息未能正常发送，请复制内容后重新发送，刷新页面后此消息将不会保留',
     LocationNotSupportError:
       '很抱歉，你的所在地区不支持此模型服务，可能是由于区域限制或服务未开通。请确认当前地区是否支持使用此服务，或尝试使用切换到其他地区后重试。',
+    InsufficientQuota:
+      '很抱歉，该密钥的配额(quota)已达上限，请检查账户余额是否充足，或增大密钥配额后再试',
+    ModelNotFound:
+      '很抱歉，无法请求到相应的模型，可能是模型不存在或者没有访问权限导致，请更换 API Key 或调整访问权限后重试',
+    ExceededContextWindow: '当前请求内容超出模型可处理的长度，请减少内容量后重试',
     QuotaLimitReached:
       '很抱歉，当前 Token 用量或请求次数已达该密钥的配额(quota)上限，请增加该密钥的配额或稍后再试',
     PermissionDenied: '很抱歉，你没有权限访问该服务，请检查你的密钥是否有访问权限',
     InvalidProviderAPIKey: '{{provider}} API Key 不正确或为空，请检查 {{provider}} API Key 后重试',
     ProviderBizError: '请求 {{provider}} 服务出错，请根据以下信息排查或重试',
+
+    GoogleAIBlockReason: {
+      BLOCKLIST: '您的内容包含被禁止的词汇。请检查并修改您的输入内容后重试。',
+      IMAGE_SAFETY: '生成的图像内容因安全原因被阻止。请尝试修改您的图像生成请求。',
+      LANGUAGE: '您使用的语言暂不被支持。请尝试使用英语或其他支持的语言重新提问。',
+      OTHER: '内容因未知原因被阻止。请尝试重新表述您的请求。',
+      PROHIBITED_CONTENT: '您的请求可能包含违禁内容。请调整您的请求，确保内容符合使用规范。',
+      RECITATION: '您的内容因可能涉及版权问题而被阻止。请尝试使用原创内容或重新表述您的请求。',
+      SAFETY: '您的内容因安全策略而被阻止。请尝试调整您的请求内容，避免包含可能的有害或不当内容。',
+      SPII: '您的内容可能包含敏感个人身份信息。为保护隐私，请移除相关敏感信息后重试。',
+      default: '内容被阻止：{{blockReason}}。请调整您的请求内容后重试。',
+    },
     /**
      * @deprecated
      */
     NoOpenAIAPIKey: 'OpenAI API Key 不正确或为空，请添加自定义 OpenAI API Key',
-    /**
-     * @deprecated
-     */
-    OpenAIBizError: '请求 OpenAI 服务出错，请根据以下信息排查或重试',
 
+    InvalidVertexCredentials: 'Vertex 鉴权未通过，请检查鉴权凭证后重试',
     InvalidBedrockCredentials: 'Bedrock 鉴权未通过，请检查 AccessKeyId/SecretAccessKey 后重试',
     StreamChunkError:
       '流式请求的消息块解析错误，请检查当前 API 接口是否符合标准规范，或联系你的 API 供应商咨询',
@@ -120,7 +152,7 @@ export default {
     // cloud
     FreePlanLimit: '当前为免费用户，无法使用该功能，请升级到付费计划后继续使用',
     SubscriptionPlanLimit:
-      '您的订阅额度已用尽，无法使用该功能，请升级到更高计划，或购买资源包后继续使用',
+      '您的订阅积分已用尽，无法使用该功能，请升级到更高计划，或配置自定义模型 API 后继续使用',
 
     // Github Token
     InvalidGithubToken: 'Github PAT 不正确或为空，请检查 Github PAT 后重试',
@@ -131,6 +163,7 @@ export default {
   stt: {
     responseError: '服务请求失败，请检查配置或重试',
   },
+  testConnectionFailed: '测试连接失败：{{error}}',
   tts: {
     responseError: '服务请求失败，请检查配置或重试',
   },
@@ -138,6 +171,7 @@ export default {
     addProxyUrl: '添加 OpenAI 代理地址（可选）',
     apiKey: {
       description: '输入你的 {{name}} API Key 即可开始会话',
+      imageGenerationDescription: '输入你的 {{name}} API Key 即可开始生成',
       title: '使用自定义 {{name}} API Key',
     },
     closeMessage: '关闭提示',

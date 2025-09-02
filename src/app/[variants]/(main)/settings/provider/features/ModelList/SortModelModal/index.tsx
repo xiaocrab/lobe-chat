@@ -1,12 +1,12 @@
-import { Modal, SortableList } from '@lobehub/ui';
-import { App, Button } from 'antd';
+import { Button, Modal, SortableList } from '@lobehub/ui';
+import { App } from 'antd';
 import { createStyles } from 'antd-style';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { useAiInfraStore } from '@/store/aiInfra';
-import { AiProviderModelListItem } from '@/types/aiModel';
+import { AiProviderModelListItem } from '../../../../../../../../../packages/model-bank/src/types/aiModel';
 
 import ListItem from './ListItem';
 

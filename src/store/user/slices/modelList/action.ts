@@ -1,16 +1,16 @@
+import { ModelProvider } from '@lobechat/model-runtime';
+import type {
+  ChatModelCard,
+  GlobalLLMProviderKey,
+  ModelProviderCard,
+  UserKeyVaults,
+  UserModelProviderConfig,
+} from '@lobechat/types';
 import { produce } from 'immer';
 import useSWR, { SWRResponse } from 'swr';
 import type { StateCreator } from 'zustand/vanilla';
 
-import { DEFAULT_MODEL_PROVIDER_LIST } from '@/config/modelProviders';
-import { ModelProvider } from '@/libs/agent-runtime';
-import { UserStore } from '@/store/user';
-import type { ChatModelCard, ModelProviderCard } from '@/types/llm';
-import type {
-  GlobalLLMProviderKey,
-  UserKeyVaults,
-  UserModelProviderConfig,
-} from '@/types/user/settings';
+import type { UserStore } from '@/store/user';
 
 import { settingsSelectors } from '../settings/selectors';
 import { CustomModelCardDispatch, customModelCardsReducer } from './reducers/customModelCard';
@@ -28,7 +28,7 @@ export interface ModelListAction {
   /**
    * make sure the default model provider list is sync to latest state
    */
-  refreshDefaultModelProviderList: (params?: { trigger?: string }) => void;
+  refreshDefaultModelProviderList: (params?: { trigger?: string }) => Promise<void>;
   refreshModelProviderList: (params?: { trigger?: string }) => void;
   removeEnabledModels: (provider: GlobalLLMProviderKey, model: string) => Promise<void>;
   setModelProviderConfig: <T extends GlobalLLMProviderKey>(
@@ -50,6 +50,8 @@ export interface ModelListAction {
     config: Partial<UserKeyVaults[T]>,
   ) => Promise<void>;
 
+  updateKeyVaultSettings: (key: string, config: any) => Promise<void>;
+
   useFetchProviderModelList: (
     provider: GlobalLLMProviderKey,
     enabledAutoFetch: boolean,
@@ -67,7 +69,7 @@ export const createModelListSlice: StateCreator<
       remoteModelCards: [],
     });
 
-    get().refreshDefaultModelProviderList();
+    await get().refreshDefaultModelProviderList();
   },
   dispatchCustomModelCards: async (provider, payload) => {
     const prevState = settingsSelectors.providerConfig(provider)(get());
@@ -78,7 +80,7 @@ export const createModelListSlice: StateCreator<
 
     await get().setModelProviderConfig(provider, { customModelCards: nextState });
   },
-  refreshDefaultModelProviderList: (params) => {
+  refreshDefaultModelProviderList: async (params) => {
     /**
      * Because we have several model cards sources, we need to merge the model cards
      * the priority is below:
@@ -104,6 +106,7 @@ export const createModelListSlice: StateCreator<
       return providerCard.chatModels;
     };
 
+    const { DEFAULT_MODEL_PROVIDER_LIST } = await import('@/config/modelProviders');
     const defaultModelProviderList = produce(DEFAULT_MODEL_PROVIDER_LIST, (draft) => {
       Object.values(ModelProvider).forEach((id) => {
         const provider = draft.find((d) => d.id === id);
@@ -116,22 +119,23 @@ export const createModelListSlice: StateCreator<
     get().refreshModelProviderList({ trigger: 'refreshDefaultModelList' });
   },
   refreshModelProviderList: (params) => {
-    const modelProviderList = get().defaultModelProviderList.map((list) => ({
-      ...list,
-      chatModels: modelProviderSelectors
-        .getModelCardsById(list.id)(get())
-        ?.map((model) => {
-          const models = modelProviderSelectors.getEnableModelsById(list.id)(get());
+    const modelProviderList = get().defaultModelProviderList.map((list) => {
+      const enabledModels = modelProviderSelectors.getEnableModelsById(list.id)(get());
+      return {
+        ...list,
+        chatModels: modelProviderSelectors
+          .getModelCardsById(list.id)(get())
+          ?.map((model) => {
+            if (!enabledModels) return model;
 
-          if (!models) return model;
-
-          return {
-            ...model,
-            enabled: models?.some((m) => m === model.id),
-          };
-        }),
-      enabled: modelProviderSelectors.isProviderEnabled(list.id as any)(get()),
-    }));
+            return {
+              ...model,
+              enabled: enabledModels?.some((m) => m === model.id),
+            };
+          }),
+        enabled: modelProviderSelectors.isProviderEnabled(list.id as any)(get()),
+      };
+    });
 
     set({ modelProviderList }, false, `refreshModelList - ${params?.trigger}`);
   },
@@ -189,13 +193,17 @@ export const createModelListSlice: StateCreator<
     await get().setSettings({ keyVaults: { [provider]: config } });
   },
 
+  updateKeyVaultSettings: async (provider, config) => {
+    await get().setSettings({ keyVaults: { [provider]: config } });
+  },
+
   useFetchProviderModelList: (provider, enabledAutoFetch) =>
     useSWR<ChatModelCard[] | undefined>(
       [provider, enabledAutoFetch],
       async ([p]) => {
         const { modelsService } = await import('@/services/models');
 
-        return modelsService.getChatModels(p);
+        return modelsService.getModels(p);
       },
       {
         onSuccess: async (data) => {

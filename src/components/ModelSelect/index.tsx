@@ -1,31 +1,28 @@
 import { IconAvatarProps, ModelIcon, ProviderIcon } from '@lobehub/icons';
-import { Avatar, Icon, Tooltip } from '@lobehub/ui';
-import { Typography } from 'antd';
-import { createStyles } from 'antd-style';
-import { Infinity, AtomIcon, LucideEye, LucidePaperclip, ToyBrick } from 'lucide-react';
+import { Avatar, Icon, Tag, Text, Tooltip } from '@lobehub/ui';
+import { createStyles, useResponsive } from 'antd-style';
+import {
+  Infinity,
+  AtomIcon,
+  LucideEye,
+  LucideGlobe,
+  LucideImage,
+  LucidePaperclip,
+  ToyBrick,
+} from 'lucide-react';
 import numeral from 'numeral';
-import { rgba } from 'polished';
 import { FC, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Center, Flexbox } from 'react-layout-kit';
+import { Flexbox } from 'react-layout-kit';
 
-import { ModelAbilities } from '@/types/aiModel';
+import { ModelAbilities } from '../../../packages/model-bank/src/types/aiModel';
 import { AiProviderSourceType } from '@/types/aiProvider';
 import { ChatModelCard } from '@/types/llm';
 import { formatTokenNumber } from '@/utils/format';
 
+export const TAG_CLASSNAME = 'lobe-model-info-tags';
+
 const useStyles = createStyles(({ css, token }) => ({
-  custom: css`
-    width: 36px;
-    height: 20px;
-    border-radius: 4px;
-
-    font-family: ${token.fontFamilyCode};
-    font-size: 12px;
-    color: ${rgba(token.colorWarning, 0.75)};
-
-    background: ${token.colorWarningBg};
-  `,
   tag: css`
     cursor: default;
 
@@ -33,24 +30,12 @@ const useStyles = createStyles(({ css, token }) => ({
     align-items: center;
     justify-content: center;
 
-    width: 20px;
+    width: 20px !important;
     height: 20px;
     border-radius: 4px;
   `,
-  tagBlue: css`
-    color: ${token.geekblue};
-    background: ${token.geekblue1};
-  `,
-  tagGreen: css`
-    color: ${token.green};
-    background: ${token.green1};
-  `,
-  tagPurple: css`
-    color: ${token.purple};
-    background: ${token.purple1};
-  `,
   token: css`
-    width: 36px;
+    width: 36px !important;
     height: 20px;
     border-radius: 4px;
 
@@ -72,19 +57,35 @@ interface ModelInfoTagsProps extends ModelAbilities {
 export const ModelInfoTags = memo<ModelInfoTagsProps>(
   ({ directionReverse, placement = 'right', ...model }) => {
     const { t } = useTranslation('components');
-    const { styles, cx } = useStyles();
+    const { styles } = useStyles();
 
     return (
-      <Flexbox direction={directionReverse ? 'horizontal-reverse' : 'horizontal'} gap={4}>
+      <Flexbox
+        className={TAG_CLASSNAME}
+        direction={directionReverse ? 'horizontal-reverse' : 'horizontal'}
+        gap={4}
+        width={'fit-content'}
+      >
         {model.files && (
           <Tooltip
             placement={placement}
             styles={{ root: { pointerEvents: 'none' } }}
             title={t('ModelSelect.featureTag.file')}
           >
-            <div className={cx(styles.tag, styles.tagGreen)} style={{ cursor: 'pointer' }} title="">
+            <Tag className={styles.tag} color={'success'} size={'small'}>
               <Icon icon={LucidePaperclip} />
-            </div>
+            </Tag>
+          </Tooltip>
+        )}
+        {model.imageOutput && (
+          <Tooltip
+            placement={placement}
+            styles={{ root: { pointerEvents: 'none' } }}
+            title={t('ModelSelect.featureTag.imageOutput')}
+          >
+            <Tag className={styles.tag} color={'success'} size={'small'}>
+              <Icon icon={LucideImage} />
+            </Tag>
           </Tooltip>
         )}
         {model.vision && (
@@ -93,9 +94,9 @@ export const ModelInfoTags = memo<ModelInfoTagsProps>(
             styles={{ root: { pointerEvents: 'none' } }}
             title={t('ModelSelect.featureTag.vision')}
           >
-            <div className={cx(styles.tag, styles.tagGreen)} style={{ cursor: 'pointer' }} title="">
+            <Tag className={styles.tag} color={'success'} size={'small'}>
               <Icon icon={LucideEye} />
-            </div>
+            </Tag>
           </Tooltip>
         )}
         {model.functionCall && (
@@ -106,9 +107,9 @@ export const ModelInfoTags = memo<ModelInfoTagsProps>(
             }}
             title={t('ModelSelect.featureTag.functionCall')}
           >
-            <div className={cx(styles.tag, styles.tagBlue)} style={{ cursor: 'pointer' }} title="">
+            <Tag className={styles.tag} color={'info'} size={'small'}>
               <Icon icon={ToyBrick} />
-            </div>
+            </Tag>
           </Tooltip>
         )}
         {model.reasoning && (
@@ -117,9 +118,20 @@ export const ModelInfoTags = memo<ModelInfoTagsProps>(
             styles={{ root: { pointerEvents: 'none' } }}
             title={t('ModelSelect.featureTag.reasoning')}
           >
-            <div className={cx(styles.tag, styles.tagPurple)} style={{ cursor: 'pointer' }}>
+            <Tag className={styles.tag} color={'purple'} size={'small'}>
               <Icon icon={AtomIcon} />
-            </div>
+            </Tag>
+          </Tooltip>
+        )}
+        {model.search && (
+          <Tooltip
+            placement={placement}
+            styles={{ root: { pointerEvents: 'none' } }}
+            title={t('ModelSelect.featureTag.search')}
+          >
+            <Tag className={styles.tag} color={'cyan'} size={'small'}>
+              <Icon icon={LucideGlobe} />
+            </Tag>
           </Tooltip>
         )}
         {typeof model.contextWindowTokens === 'number' && (
@@ -135,13 +147,13 @@ export const ModelInfoTags = memo<ModelInfoTagsProps>(
                   : numeral(model.contextWindowTokens).format('0,0'),
             })}
           >
-            <Center className={styles.token} title="">
+            <Tag className={styles.token} size={'small'}>
               {model.contextWindowTokens === 0 ? (
                 <Infinity size={17} strokeWidth={1.6} />
               ) : (
                 formatTokenNumber(model.contextWindowTokens as number)
               )}
-            </Center>
+            </Tag>
           </Tooltip>
         )}
       </Flexbox>
@@ -154,15 +166,31 @@ interface ModelItemRenderProps extends ChatModelCard {
 }
 
 export const ModelItemRender = memo<ModelItemRenderProps>(({ showInfoTag = true, ...model }) => {
+  const { mobile } = useResponsive();
   return (
-    <Flexbox align={'center'} gap={32} horizontal justify={'space-between'}>
-      <Flexbox align={'center'} gap={8} horizontal>
+    <Flexbox
+      align={'center'}
+      gap={32}
+      horizontal
+      justify={'space-between'}
+      style={{
+        minWidth: mobile ? '100%' : undefined,
+        overflow: 'hidden',
+        position: 'relative',
+        width: mobile ? '80vw' : 'auto',
+      }}
+    >
+      <Flexbox
+        align={'center'}
+        gap={8}
+        horizontal
+        style={{ flexShrink: 1, minWidth: 0, overflow: 'hidden' }}
+      >
         <ModelIcon model={model.id} size={20} />
-        <Typography.Paragraph ellipsis={false} style={{ marginBottom: 0 }}>
+        <Text style={mobile ? { maxWidth: '60vw', overflowX: 'auto', whiteSpace: 'nowrap' } : {}}>
           {model.displayName || model.id}
-        </Typography.Paragraph>
+        </Text>
       </Flexbox>
-
       {showInfoTag && <ModelInfoTags {...model} />}
     </Flexbox>
   );

@@ -1,9 +1,8 @@
 ---
 title: LobeChat Authentication Service Environment Variables
 description: >-
-  Explore the essential environment variables for configuring authentication
-  services in LobeChat, including OAuth SSO, NextAuth settings, and
-  provider-specific details.
+  Explore the essential environment variables for configuring authentication services in LobeChat, including OAuth SSO, NextAuth settings, and provider-specific details.
+
 tags:
   - Authentication Service
   - OAuth SSO
@@ -18,6 +17,16 @@ LobeChat provides a complete authentication service capability when deployed. Th
 ## Next Auth
 
 ### General Settings
+
+#### `NEXT_PUBLIC_ENABLE_NEXT_AUTH`
+
+- Changes after v1.52.0.
+
+- For users who deploy with Vercel using Next Auth, it is necessary to add the environment variable NEXT\_PUBLIC\_ENABLE\_NEXT\_AUTH=1 to ensure that Next Auth is enabled.
+
+- For users who use Clerk in their self-built image, it is necessary to configure the environment variable NEXT\_PUBLIC\_ENABLE\_NEXT\_AUTH=0 to disable Next Auth.\n
+
+- Other standard deployment scenarios (using Clerk on Vercel and next-auth in Docker) are not affected
 
 #### `NEXT_AUTH_SECRET`
 
@@ -239,6 +248,29 @@ LobeChat provides a complete authentication service capability when deployed. Th
 - Description: Issuer of the ZITADEL application. This is usually the URL of the ZITADEL instance, and can be found in `URLs` tab of your application in the console.
 - Default: `-`
 - Example: `https://your-instance-abc123.zitadel.cloud`
+
+### Okta
+
+#### `AUTH_OKTA_ID`
+
+- Type: Required
+- Description: Client ID of the Okta application. This can be found under your application settings in the Okta console.
+- Default: `-`
+- Example: `ac12c950f3ce48c8a45a`
+
+#### `AUTH_OKTA_SECRET`
+
+- Type: Required
+- Description: Client Secret of the Okta application. This can be found under your application settings in the Okta console.
+- Default: `-`
+- Example: `ex1HqvSOOkC5INqo42grOSqNvHoD4p84em1yy5QU7v88IZlaWGywFjYkrkpkSopt`
+
+#### `AUTH_OKTA_ISSUER`
+
+- Type: Required
+- Description: Issuer of the Okta application. This is the URL of the Okta instance -- If branding is set up, it can be your custom domain.
+- Default: `-`
+- Example: `https://your-instance.okta.com`
 
 ### Generic OIDC
 

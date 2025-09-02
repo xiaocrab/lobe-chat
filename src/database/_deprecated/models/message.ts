@@ -1,4 +1,4 @@
-import { DeepPartial } from 'utility-types';
+import type { PartialDeep } from 'type-fest';
 
 import { BaseModel } from '@/database/_deprecated/core';
 import { DBModel } from '@/database/_deprecated/core/types/db';
@@ -118,7 +118,7 @@ class _MessageModel extends BaseModel {
   async batchCreate(messages: ChatMessage[]) {
     const data: DB_Message[] = messages.map((m) => this.mapChatMessageToDBMessage(m));
 
-    return this._batchAdd(data, { withSync: true });
+    return this._batchAdd(data);
   }
 
   async duplicateMessages(messages: ChatMessage[]): Promise<ChatMessage[]> {
@@ -189,7 +189,7 @@ class _MessageModel extends BaseModel {
 
   // **************** Update *************** //
 
-  async update(id: string, data: DeepPartial<DB_Message>) {
+  async update(id: string, data: PartialDeep<DB_Message>) {
     return super._updateWithSync(id, data);
   }
 
@@ -264,13 +264,13 @@ class _MessageModel extends BaseModel {
     translate,
     tts,
     ...item
-  }: DBModel<DB_Message>): ChatMessage => {
+  }: DBModel<DB_Message>) => {
     return {
       ...item,
       extra: { fromModel, fromProvider, translate, tts },
       meta: {},
       topicId: item.topicId ?? undefined,
-    };
+    } as ChatMessage;
   };
 }
 

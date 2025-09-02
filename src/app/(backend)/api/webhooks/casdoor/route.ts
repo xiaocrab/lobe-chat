@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { authEnv } from '@/config/auth';
+import { serverDB } from '@/database/server';
 import { pino } from '@/libs/logger';
 import { NextAuthUserService } from '@/server/services/nextAuthUser';
 
@@ -16,22 +17,20 @@ export const POST = async (req: Request): Promise<NextResponse> => {
     );
   }
 
-  const { action, extendedUser } = payload;
+  const { action, object } = payload;
 
-  pino.trace(`casdoor webhook payload: ${{ action, extendedUser }}`);
-
-  const nextAuthUserService = new NextAuthUserService();
+  const nextAuthUserService = new NextAuthUserService(serverDB);
   switch (action) {
     case 'update-user': {
       return nextAuthUserService.safeUpdateUser(
         {
           provider: 'casdoor',
-          providerAccountId: extendedUser.id,
+          providerAccountId: object.id,
         },
         {
-          avatar: extendedUser?.avatar,
-          email: extendedUser?.email,
-          fullName: extendedUser.displayName,
+          avatar: object?.avatar,
+          email: object?.email,
+          fullName: object.displayName,
         },
       );
     }

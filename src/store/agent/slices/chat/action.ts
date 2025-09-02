@@ -1,12 +1,11 @@
 import isEqual from 'fast-deep-equal';
 import { produce } from 'immer';
 import { SWRResponse, mutate } from 'swr';
-import { DeepPartial } from 'utility-types';
+import type { PartialDeep } from 'type-fest';
 import { StateCreator } from 'zustand/vanilla';
 
 import { MESSAGE_CANCEL_FLAT } from '@/const/message';
 import { INBOX_SESSION_ID } from '@/const/session';
-import { DEFAULT_AGENT_CONFIG } from '@/const/settings';
 import { useClientDataSWR, useOnlyFetchOnceSWR } from '@/libs/swr';
 import { agentService } from '@/services/agent';
 import { sessionService } from '@/services/session';
@@ -16,7 +15,7 @@ import { LobeAgentChatConfig, LobeAgentConfig } from '@/types/agent';
 import { KnowledgeItem } from '@/types/knowledgeBase';
 import { merge } from '@/utils/merge';
 
-import { AgentStore } from '../../store';
+import type { AgentStore } from '../../store';
 import { agentSelectors } from './selectors';
 
 /**
@@ -29,14 +28,14 @@ export interface AgentChatAction {
 
   internal_dispatchAgentMap: (
     id: string,
-    config: DeepPartial<LobeAgentConfig>,
+    config: PartialDeep<LobeAgentConfig>,
     actions?: string,
   ) => void;
   internal_refreshAgentConfig: (id: string) => Promise<void>;
   internal_refreshAgentKnowledge: () => Promise<void>;
   internal_updateAgentConfig: (
     id: string,
-    data: DeepPartial<LobeAgentConfig>,
+    data: PartialDeep<LobeAgentConfig>,
     signal?: AbortSignal,
   ) => Promise<void>;
   removeFileFromAgent: (fileId: string) => Promise<void>;
@@ -48,13 +47,13 @@ export interface AgentChatAction {
 
   togglePlugin: (id: string, open?: boolean) => Promise<void>;
   updateAgentChatConfig: (config: Partial<LobeAgentChatConfig>) => Promise<void>;
-  updateAgentConfig: (config: DeepPartial<LobeAgentConfig>) => Promise<void>;
-  useFetchAgentConfig: (id: string) => SWRResponse<LobeAgentConfig>;
+  updateAgentConfig: (config: PartialDeep<LobeAgentConfig>) => Promise<void>;
+  useFetchAgentConfig: (isLogin: boolean | undefined, id: string) => SWRResponse<LobeAgentConfig>;
   useFetchFilesAndKnowledgeBases: () => SWRResponse<KnowledgeItem[]>;
-  useInitAgentStore: (
+  useInitInboxAgentStore: (
     isLogin: boolean | undefined,
-    defaultAgentConfig?: DeepPartial<LobeAgentConfig>,
-  ) => SWRResponse<DeepPartial<LobeAgentConfig>>;
+    defaultAgentConfig?: PartialDeep<LobeAgentConfig>,
+  ) => SWRResponse<PartialDeep<LobeAgentConfig>>;
 }
 
 const FETCH_AGENT_CONFIG_KEY = 'FETCH_AGENT_CONFIG';
@@ -159,17 +158,23 @@ export const createChatSlice: StateCreator<
 
     await get().internal_updateAgentConfig(activeId, config, controller.signal);
   },
-  useFetchAgentConfig: (sessionId) =>
+  useFetchAgentConfig: (isLogin, sessionId) =>
     useClientDataSWR<LobeAgentConfig>(
-      [FETCH_AGENT_CONFIG_KEY, sessionId],
+      isLogin ? [FETCH_AGENT_CONFIG_KEY, sessionId] : null,
       ([, id]: string[]) => sessionService.getSessionConfig(id),
       {
-        fallbackData: DEFAULT_AGENT_CONFIG,
         onSuccess: (data) => {
           get().internal_dispatchAgentMap(sessionId, data, 'fetch');
-          set({ activeAgentId: data.id }, false, 'updateActiveAgentId');
+
+          set(
+            {
+              activeAgentId: data.id,
+              agentConfigInitMap: { ...get().agentConfigInitMap, [sessionId]: true },
+            },
+            false,
+            'fetchAgentConfig',
+          );
         },
-        suspense: true,
       },
     ),
   useFetchFilesAndKnowledgeBases: () => {
@@ -183,8 +188,8 @@ export const createChatSlice: StateCreator<
     );
   },
 
-  useInitAgentStore: (isLogin, defaultAgentConfig) =>
-    useOnlyFetchOnceSWR<DeepPartial<LobeAgentConfig>>(
+  useInitInboxAgentStore: (isLogin, defaultAgentConfig) =>
+    useOnlyFetchOnceSWR<PartialDeep<LobeAgentConfig>>(
       !!isLogin ? 'fetchInboxAgentConfig' : null,
       () => sessionService.getSessionConfig(INBOX_SESSION_ID),
       {
