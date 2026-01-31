@@ -1,27 +1,64 @@
 import { AIChatModelCard, AIImageModelCard } from '../types/aiModel';
 
+// price: https://bigmodel.cn/pricing
+// ref: https://docs.bigmodel.cn/cn/guide/start/model-overview
+
 const zhipuChatModels: AIChatModelCard[] = [
   {
     abilities: {
       functionCall: true,
       reasoning: true,
       search: true,
-      vision: true,
     },
-    contextWindowTokens: 65_536,
+    contextWindowTokens: 200_000,
     description:
-      '智谱新一代基于 MOE 架构的视觉推理模型，以106B的总参数量和12B激活参数量，在各类基准测试中达到全球同级别开源多模态模型 SOTA，涵盖图像、视频、文档理解及 GUI 任务等常见任务。',
-    displayName: 'GLM-4.5V',
+      "GLM-4.7 is Zhipu's latest flagship model, enhanced for Agentic Coding scenarios with improved coding capabilities, long-term task planning, and tool collaboration. It achieves leading performance among open-source models on multiple public benchmarks. General capabilities are improved with more concise and natural responses and more immersive writing. For complex agent tasks, instruction following during tool calls is stronger, and the frontend aesthetics and long-term task completion efficiency of Artifacts and Agentic Coding are further enhanced.",
+    displayName: 'GLM-4.7',
     enabled: true,
-    id: 'glm-4.5v',
-    maxOutput: 32_768,
+    id: 'glm-4.7',
+    maxOutput: 131_072,
     pricing: {
       currency: 'CNY',
       units: [
-        // 输入长度 [0, 32]
-        { name: 'textInput_cacheRead', rate: 0.4, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 6, strategy: 'fixed', unit: 'millionTokens' },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 0.4,
+              '[0, 0.032]_[0.0002, infinity]': 0.6,
+              '[0.032, 0.2]': 0.8,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textInput_cacheRead',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 2,
+              '[0, 0.032]_[0.0002, infinity]': 3,
+              '[0.032, 0.2]': 4,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textInput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 8,
+              '[0, 0.032]_[0.0002, infinity]': 14,
+              '[0.032, 0.2]': 16,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textOutput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
       ],
     },
     settings: {
@@ -36,114 +73,13 @@ const zhipuChatModels: AIChatModelCard[] = [
       reasoning: true,
       search: true,
     },
-    contextWindowTokens: 128_000,
+    contextWindowTokens: 200_000,
     description:
-      '智谱最新旗舰模型，支持思考模式切换，综合能力达到开源模型的 SOTA 水平，上下文长度可达128K。',
-    displayName: 'GLM-4.5',
+      'GLM-4.7-Flash, as a 30B-level SOTA model, offers a new choice that balances performance and efficiency. It enhances coding capabilities, long-term task planning, and tool collaboration for Agentic Coding scenarios, achieving leading performance among open-source models of the same size in multiple current benchmark leaderboards. In executing complex intelligent agent tasks, it has stronger instruction compliance during tool calls, and further improves the aesthetics of front-end and the efficiency of long-term task completion for Artifacts and Agentic Coding.',
+    displayName: 'GLM-4.7-Flash',
     enabled: true,
-    id: 'glm-4.5',
-    maxOutput: 32_768,
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput_cacheRead', rate: 0.8, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textInput', rate: 4, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 16, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    settings: {
-      extendParams: ['enableReasoning'],
-      searchImpl: 'params',
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-      reasoning: true,
-      search: true,
-    },
-    contextWindowTokens: 128_000,
-    description: 'GLM-4.5 的极速版，在性能强劲的同时，生成速度可达 100 tokens/秒。',
-    displayName: 'GLM-4.5-X',
-    id: 'glm-4.5-x',
-    maxOutput: 32_768,
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput_cacheRead', rate: 3.2, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textInput', rate: 16, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 64, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    settings: {
-      extendParams: ['enableReasoning'],
-      searchImpl: 'params',
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-      reasoning: true,
-      search: true,
-    },
-    contextWindowTokens: 128_000,
-    description: 'GLM-4.5 的轻量版，兼顾性能与性价比，可灵活切换混合思考模型。',
-    displayName: 'GLM-4.5-Air',
-    id: 'glm-4.5-air',
-    maxOutput: 32_768,
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput_cacheRead', rate: 0.24, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textInput', rate: 1.2, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 8, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    settings: {
-      extendParams: ['enableReasoning'],
-      searchImpl: 'params',
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-      reasoning: true,
-      search: true,
-    },
-    contextWindowTokens: 128_000,
-    description: 'GLM-4.5-Air 的极速版，响应速度更快，专为大规模高速度需求打造。',
-    displayName: 'GLM-4.5-AirX',
-    id: 'glm-4.5-airx',
-    maxOutput: 32_768,
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput_cacheRead', rate: 1.6, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textInput', rate: 8, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 32, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    settings: {
-      extendParams: ['enableReasoning'],
-      searchImpl: 'params',
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-      reasoning: true,
-      search: true,
-    },
-    contextWindowTokens: 128_000,
-    description: 'GLM-4.5 的免费版，推理、代码、智能体等任务表现出色。',
-    displayName: 'GLM-4.5-Flash',
-    enabled: true,
-    id: 'glm-4.5-flash',
-    maxOutput: 32_768,
+    id: 'glm-4.7-flash',
+    maxOutput: 131_072,
     pricing: {
       currency: 'CNY',
       units: [
@@ -160,15 +96,408 @@ const zhipuChatModels: AIChatModelCard[] = [
   },
   {
     abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+    contextWindowTokens: 200_000,
+    description:
+      'GLM-4.7-Flash, as a 30B-level SOTA model, offers a new choice that balances performance and efficiency. It enhances coding capabilities, long-term task planning, and tool collaboration for Agentic Coding scenarios, achieving leading performance among open-source models of the same size in multiple current benchmark leaderboards. In executing complex intelligent agent tasks, it has stronger instruction compliance during tool calls, and further improves the aesthetics of front-end and the efficiency of long-term task completion for Artifacts and Agentic Coding.',
+    displayName: 'GLM-4.7-FlashX',
+    enabled: true,
+    id: 'glm-4.7-flashx',
+    maxOutput: 131_072,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput_cacheRead', rate: 0.1, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 0.5, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 3, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+      searchImpl: 'params',
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+    contextWindowTokens: 200_000,
+    description:
+      "Zhipu's latest flagship model GLM-4.6 (355B) fully surpasses its predecessors in advanced coding, long-text processing, reasoning, and agent capabilities. It particularly aligns with Claude Sonnet 4 in programming ability, becoming China's top Coding model.",
+    displayName: 'GLM-4.6',
+    id: 'glm-4.6',
+    maxOutput: 131_072,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 0.4,
+              '[0, 0.032]_[0.0002, infinity]': 0.6,
+              '[0.032, 0.2]': 0.8,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textInput_cacheRead',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 2,
+              '[0, 0.032]_[0.0002, infinity]': 3,
+              '[0.032, 0.2]': 4,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textInput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 8,
+              '[0, 0.032]_[0.0002, infinity]': 14,
+              '[0.032, 0.2]': 16,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textOutput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+      searchImpl: 'params',
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+      vision: true,
+    },
+    contextWindowTokens: 65_536,
+    description:
+      'Zhipu’s next-generation MoE vision reasoning model has 106B total parameters with 12B active, achieving SOTA among similarly sized open-source multimodal models across image, video, document understanding, and GUI tasks.',
+    displayName: 'GLM-4.5V',
+    enabled: true,
+    id: 'glm-4.5v',
+    maxOutput: 16_384,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]': 0.4,
+              '[0.032, infinity]': 0.8,
+            },
+            pricingParams: ['textInput'],
+          },
+          name: 'textInput_cacheRead',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]': 2,
+              '[0.032, infinity]': 4,
+            },
+            pricingParams: ['textInput'],
+          },
+          name: 'textInput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]': 6,
+              '[0.032, infinity]': 12,
+            },
+            pricingParams: ['textInput'],
+          },
+          name: 'textOutput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+      searchImpl: 'params',
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'Zhipu flagship model with a switchable thinking mode, delivering open-source SOTA overall and up to 128K context.',
+    displayName: 'GLM-4.5',
+    id: 'glm-4.5',
+    maxOutput: 98_304,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 0.4,
+              '[0, 0.032]_[0.0002, infinity]': 0.6,
+              '[0.032, 0.128]': 0.8,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textInput_cacheRead',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 2,
+              '[0, 0.032]_[0.0002, infinity]': 3,
+              '[0.032, 0.128]': 4,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textInput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 8,
+              '[0, 0.032]_[0.0002, infinity]': 14,
+              '[0.032, 0.128]': 16,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textOutput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+      searchImpl: 'params',
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'GLM-4.5 fast edition, delivering strong performance with generation speeds up to 100 tokens/sec.',
+    displayName: 'GLM-4.5-X',
+    id: 'glm-4.5-x',
+    maxOutput: 98_304,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]': 1.6,
+              '[0, 0.032]_[0.0002, infinity]': 2.4,
+              '[0.032, 0.128]': 3.2,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textInput_cacheRead',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 8,
+              '[0, 0.032]_[0.0002, infinity]': 12,
+              '[0.032, 0.128]': 16,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textInput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 16,
+              '[0, 0.032]_[0.0002, infinity]': 32,
+              '[0.032, 0.128]': 64,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textOutput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+      searchImpl: 'params',
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'GLM-4.5 lightweight edition that balances performance and cost, with flexible hybrid thinking modes.',
+    displayName: 'GLM-4.5-Air',
+    id: 'glm-4.5-air',
+    maxOutput: 98_304,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]': 0.16,
+              '[0.032, 0.128]': 0.24,
+            },
+            pricingParams: ['textInput'],
+          },
+          name: 'textInput_cacheRead',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]': 0.8,
+              '[0.032, 0.128]': 1.2,
+            },
+            pricingParams: ['textInput'],
+          },
+          name: 'textInput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 2,
+              '[0, 0.032]_[0.0002, infinity]': 6,
+              '[0.032, 0.128]': 8,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textOutput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+      searchImpl: 'params',
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+    contextWindowTokens: 131_072,
+    description: 'GLM-4.5-Air fast edition with quicker responses for high-scale, high-speed use.',
+    displayName: 'GLM-4.5-AirX',
+    id: 'glm-4.5-airx',
+    maxOutput: 98_304,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]': 0.8,
+              '[0.032, 0.128]': 1.6,
+            },
+            pricingParams: ['textInput'],
+          },
+          name: 'textInput_cacheRead',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]': 4,
+              '[0.032, 0.128]': 8,
+            },
+            pricingParams: ['textInput'],
+          },
+          name: 'textInput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+        {
+          lookup: {
+            prices: {
+              '[0, 0.032]_[0, 0.0002]': 12,
+              '[0, 0.032]_[0.0002, infinity]': 16,
+              '[0.032, 0.128]': 32,
+            },
+            pricingParams: ['textInput', 'textOutput'],
+          },
+          name: 'textOutput',
+          strategy: 'lookup',
+          unit: 'millionTokens',
+        },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+      searchImpl: 'params',
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
       reasoning: true,
       vision: true,
     },
     contextWindowTokens: 65_536,
     description:
-      'GLM-4.1V-Thinking 系列模型是目前已知10B级别的VLM模型中性能最强的视觉模型，融合了同级别SOTA的各项视觉语言任务，包括视频理解、图片问答、学科解题、OCR文字识别、文档和图表解读、GUI Agent、前端网页Coding、Grounding等，多项任务能力甚至超过8倍参数量的Qwen2.5-VL-72B。通过领先的强化学习技术，模型掌握了通过思维链推理的方式提升回答的准确性和丰富度，从最终效果和可解释性等维度都显著超过传统的非thinking模型。',
+      'GLM-4.1V-Thinking is the strongest known ~10B VLM, covering SOTA tasks like video understanding, image QA, subject solving, OCR, document and chart reading, GUI agents, frontend coding, and grounding. It even surpasses the 8x larger Qwen2.5-VL-72B on many tasks. With advanced RL, it uses chain-of-thought reasoning to improve accuracy and richness, outperforming traditional non-thinking models in both outcomes and explainability.',
     displayName: 'GLM-4.1V-Thinking-FlashX',
     id: 'glm-4.1v-thinking-flashx',
-    maxOutput: 16_384,
+    maxOutput: 32_768,
     pricing: {
       currency: 'CNY',
       units: [
@@ -185,11 +514,10 @@ const zhipuChatModels: AIChatModelCard[] = [
     },
     contextWindowTokens: 65_536,
     description:
-      'GLM-4.1V-Thinking 系列模型是目前已知10B级别的VLM模型中性能最强的视觉模型，融合了同级别SOTA的各项视觉语言任务，包括视频理解、图片问答、学科解题、OCR文字识别、文档和图表解读、GUI Agent、前端网页Coding、Grounding等，多项任务能力甚至超过8倍参数量的Qwen2.5-VL-72B。通过领先的强化学习技术，模型掌握了通过思维链推理的方式提升回答的准确性和丰富度，从最终效果和可解释性等维度都显著超过传统的非thinking模型。',
+      'GLM-4.1V-Thinking is the strongest known ~10B VLM, covering SOTA tasks like video understanding, image QA, subject solving, OCR, document and chart reading, GUI agents, frontend coding, and grounding. It even surpasses the 8x larger Qwen2.5-VL-72B on many tasks. With advanced RL, it uses chain-of-thought reasoning to improve accuracy and richness, outperforming traditional non-thinking models in both outcomes and explainability.',
     displayName: 'GLM-4.1V-Thinking-Flash',
-    enabled: true,
     id: 'glm-4.1v-thinking-flash',
-    maxOutput: 16_384,
+    maxOutput: 32_768,
     pricing: {
       currency: 'CNY',
       units: [
@@ -204,7 +532,8 @@ const zhipuChatModels: AIChatModelCard[] = [
       reasoning: true,
     },
     contextWindowTokens: 16_384,
-    description: 'GLM-Zero-Preview具备强大的复杂推理能力，在逻辑推理、数学、编程等领域表现优异。',
+    description:
+      'GLM-Zero-Preview delivers strong complex reasoning, excelling in logic, math, and programming.',
     displayName: 'GLM-Zero-Preview',
     id: 'glm-zero-preview',
     pricing: {
@@ -221,8 +550,8 @@ const zhipuChatModels: AIChatModelCard[] = [
       reasoning: true,
       search: true,
     },
-    contextWindowTokens: 128_000,
-    description: '推理模型: 具备强大推理能力，适用于需要深度推理的任务。',
+    contextWindowTokens: 131_072,
+    description: 'Reasoning model with strong reasoning for tasks that require deep inference.',
     displayName: 'GLM-Z1-Air',
     id: 'glm-z1-air',
     maxOutput: 32_768,
@@ -244,10 +573,10 @@ const zhipuChatModels: AIChatModelCard[] = [
       search: true,
     },
     contextWindowTokens: 32_768,
-    description: '极速推理：具有超快的推理速度和强大的推理效果。',
+    description: 'Ultra-fast reasoning with high reasoning quality.',
     displayName: 'GLM-Z1-AirX',
     id: 'glm-z1-airx',
-    maxOutput: 30_000,
+    maxOutput: 32_768,
     pricing: {
       currency: 'CNY',
       units: [
@@ -265,8 +594,9 @@ const zhipuChatModels: AIChatModelCard[] = [
       reasoning: true,
       search: true,
     },
-    contextWindowTokens: 128_000,
-    description: '高速低价：Flash增强版本，超快推理速度，更快并发保障。',
+    contextWindowTokens: 131_072,
+    description:
+      'Fast and low-cost: Flash-enhanced with ultra-fast reasoning and higher concurrency.',
     displayName: 'GLM-Z1-FlashX',
     id: 'glm-z1-flashx',
     maxOutput: 32_768,
@@ -287,8 +617,9 @@ const zhipuChatModels: AIChatModelCard[] = [
       reasoning: true,
       search: true,
     },
-    contextWindowTokens: 128_000,
-    description: 'GLM-Z1 系列具备强大的复杂推理能力，在逻辑推理、数学、编程等领域表现优异。',
+    contextWindowTokens: 131_072,
+    description:
+      'GLM-Z1 series provides strong complex reasoning, excelling in logic, math, and programming.',
     displayName: 'GLM-Z1-Flash',
     id: 'glm-z1-flash',
     maxOutput: 32_768,
@@ -309,11 +640,11 @@ const zhipuChatModels: AIChatModelCard[] = [
       functionCall: true,
       search: true,
     },
-    contextWindowTokens: 128_000,
-    description: 'GLM-4-Flash 是处理简单任务的理想选择，速度最快且免费。',
+    contextWindowTokens: 131_072,
+    description: 'GLM-4-Flash is ideal for simple tasks: fastest and free.',
     displayName: 'GLM-4-Flash-250414',
     id: 'glm-4-flash-250414',
-    maxOutput: 16_000,
+    maxOutput: 32_768,
     pricing: {
       currency: 'CNY',
       units: [
@@ -331,11 +662,11 @@ const zhipuChatModels: AIChatModelCard[] = [
       functionCall: true,
       search: true,
     },
-    contextWindowTokens: 128_000,
-    description: 'GLM-4-FlashX 是Flash的增强版本，超快推理速度。',
+    contextWindowTokens: 131_072,
+    description: 'GLM-4-FlashX is an enhanced Flash version with ultra-fast reasoning.',
     displayName: 'GLM-4-FlashX-250414',
     id: 'glm-4-flashx',
-    maxOutput: 16_000,
+    maxOutput: 4095,
     pricing: {
       currency: 'CNY',
       units: [
@@ -354,10 +685,11 @@ const zhipuChatModels: AIChatModelCard[] = [
       search: true,
     },
     contextWindowTokens: 1_024_000,
-    description: 'GLM-4-Long 支持超长文本输入，适合记忆型任务与大规模文档处理。',
+    description:
+      'GLM-4-Long supports ultra-long inputs for memory-style tasks and large-scale document processing.',
     displayName: 'GLM-4-Long',
     id: 'glm-4-long',
-    maxOutput: 4000,
+    maxOutput: 4095,
     pricing: {
       currency: 'CNY',
       units: [
@@ -375,11 +707,12 @@ const zhipuChatModels: AIChatModelCard[] = [
       functionCall: true,
       search: true,
     },
-    contextWindowTokens: 128_000,
-    description: 'GLM-4-Air 是性价比高的版本，性能接近GLM-4，提供快速度和实惠的价格。',
+    contextWindowTokens: 131_072,
+    description:
+      'GLM-4-Air is a high-value option with performance close to GLM-4, fast speed, and lower cost.',
     displayName: 'GLM-4-Air-250414',
     id: 'glm-4-air-250414',
-    maxOutput: 16_000,
+    maxOutput: 16_384,
     pricing: {
       currency: 'CNY',
       units: [
@@ -398,10 +731,11 @@ const zhipuChatModels: AIChatModelCard[] = [
       search: true,
     },
     contextWindowTokens: 8192,
-    description: 'GLM-4-AirX 提供 GLM-4-Air 的高效版本，推理速度可达其2.6倍。',
+    description:
+      'GLM-4-AirX is a more efficient GLM-4-Air variant with up to 2.6x faster reasoning.',
     displayName: 'GLM-4-AirX',
     id: 'glm-4-airx',
-    maxOutput: 4000,
+    maxOutput: 4095,
     pricing: {
       currency: 'CNY',
       units: [
@@ -419,33 +753,12 @@ const zhipuChatModels: AIChatModelCard[] = [
       functionCall: true,
       search: true,
     },
-    contextWindowTokens: 128_000,
+    contextWindowTokens: 131_072,
     description:
-      'GLM-4-AllTools 是一个多功能智能体模型，优化以支持复杂指令规划与工具调用，如网络浏览、代码解释和文本生成，适用于多任务执行。',
-    displayName: 'GLM-4-AllTools',
-    id: 'glm-4-alltools',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 100, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 100, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    settings: {
-      searchImpl: 'params',
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-      search: true,
-    },
-    contextWindowTokens: 128_000,
-    description: 'GLM-4-Plus 作为高智能旗舰，具备强大的处理长文本和复杂任务的能力，性能全面提升。',
+      'GLM-4-Plus is a high-intelligence flagship with strong long-text and complex-task handling and upgraded overall performance.',
     displayName: 'GLM-4-Plus',
     id: 'glm-4-plus',
-    maxOutput: 4000,
+    maxOutput: 4095,
     pricing: {
       currency: 'CNY',
       units: [
@@ -463,31 +776,11 @@ const zhipuChatModels: AIChatModelCard[] = [
       functionCall: true,
       search: true,
     },
-    contextWindowTokens: 128_000,
-    description: 'GLM-4-0520 是最新模型版本，专为高度复杂和多样化任务设计，表现卓越。',
+    contextWindowTokens: 131_072,
+    description:
+      'GLM-4-0520 is the latest model version, designed for highly complex and diverse tasks with excellent performance.',
     displayName: 'GLM-4-0520',
-    id: 'glm-4-0520', // 弃用时间 2025年12月30日
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 100, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 100, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    settings: {
-      searchImpl: 'params',
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-      search: true,
-    },
-    contextWindowTokens: 128_000,
-    description: 'GLM-4 是发布于2024年1月的旧旗舰版本，目前已被更强的 GLM-4-0520 取代。',
-    displayName: 'GLM-4',
-    id: 'glm-4', // 弃用时间 2025年6月30日
+    id: 'glm-4-0520', // Deprecation date: December 30, 2025
     pricing: {
       currency: 'CNY',
       units: [
@@ -506,9 +799,10 @@ const zhipuChatModels: AIChatModelCard[] = [
     },
     contextWindowTokens: 4096,
     description:
-      'GLM-4V-Flash 专注于高效的单一图像理解，适用于快速图像解析的场景，例如实时图像分析或批量图像处理。',
+      'GLM-4V-Flash focuses on efficient single-image understanding for fast analysis scenarios such as real-time or batch image processing.',
     displayName: 'GLM-4V-Flash',
     id: 'glm-4v-flash',
+    maxOutput: 8192,
     pricing: {
       currency: 'CNY',
       units: [
@@ -524,7 +818,8 @@ const zhipuChatModels: AIChatModelCard[] = [
       vision: true,
     },
     contextWindowTokens: 16_000,
-    description: 'GLM-4V-Plus 具备对视频内容及多图片的理解能力，适合多模态任务。',
+    description:
+      'GLM-4V-Plus understands video and multiple images, suitable for multimodal tasks.',
     displayName: 'GLM-4V-Plus-0111',
     id: 'glm-4v-plus-0111',
     pricing: {
@@ -541,9 +836,10 @@ const zhipuChatModels: AIChatModelCard[] = [
       vision: true,
     },
     contextWindowTokens: 4096,
-    description: 'GLM-4V 提供强大的图像理解与推理能力，支持多种视觉任务。',
+    description: 'GLM-4V provides strong image understanding and reasoning across visual tasks.',
     displayName: 'GLM-4V',
     id: 'glm-4v',
+    maxOutput: 1024,
     pricing: {
       currency: 'CNY',
       units: [
@@ -554,9 +850,9 @@ const zhipuChatModels: AIChatModelCard[] = [
     type: 'chat',
   },
   {
-    contextWindowTokens: 128_000,
+    contextWindowTokens: 131_072,
     description:
-      'CodeGeeX-4 是强大的AI编程助手，支持多种编程语言的智能问答与代码补全，提升开发效率。',
+      'CodeGeeX-4 is a powerful AI coding assistant that supports multilingual Q&A and code completion to boost developer productivity.',
     displayName: 'CodeGeeX-4',
     id: 'codegeex-4',
     maxOutput: 32_768,
@@ -571,7 +867,8 @@ const zhipuChatModels: AIChatModelCard[] = [
   },
   {
     contextWindowTokens: 8192,
-    description: 'CharGLM-4 专为角色扮演与情感陪伴设计，支持超长多轮记忆与个性化对话，应用广泛。',
+    description:
+      'CharGLM-4 is built for roleplay and emotional companionship, supporting ultra-long multi-turn memory and personalized dialogue.',
     displayName: 'CharGLM-4',
     id: 'charglm-4',
     maxOutput: 4000,
@@ -586,7 +883,8 @@ const zhipuChatModels: AIChatModelCard[] = [
   },
   {
     contextWindowTokens: 8192,
-    description: 'Emohaa 是心理模型，具备专业咨询能力，帮助用户理解情感问题。',
+    description:
+      'Emohaa is a mental health model with professional counseling abilities to help users understand emotional issues.',
     displayName: 'Emohaa',
     id: 'emohaa',
     maxOutput: 4000,
@@ -605,7 +903,7 @@ const zhipuImageModels: AIImageModelCard[] = [
   // https://bigmodel.cn/dev/api/image-model/cogview
   {
     description:
-      'CogView-4 是智谱首个支持生成汉字的开源文生图模型，在语义理解、图像生成质量、中英文字生成能力等方面全面提升，支持任意长度的中英双语输入，能够生成在给定范围内的任意分辨率图像。',
+      'CogView-4 is Zhipu’s first open-source text-to-image model that can generate Chinese characters. It improves semantic understanding, image quality, and Chinese/English text rendering, supports arbitrary-length bilingual prompts, and can generate images at any resolution within specified ranges.',
     displayName: 'CogView-4',
     enabled: true,
     id: 'cogview-4',

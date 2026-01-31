@@ -1,8 +1,14 @@
 import { ChatInputActions, type ChatInputActionsProps } from '@lobehub/editor/react';
 import { memo, useMemo } from 'react';
 
-import { ActionKeys, actionMap } from '../ActionBar/config';
+import { useGlobalStore } from '@/store/global';
+import { systemStatusSelectors } from '@/store/global/selectors';
+import { useUserStore } from '@/store/user';
+import { labPreferSelectors } from '@/store/user/slices/preference/selectors';
+
+import { type ActionKeys, actionMap } from '../ActionBar/config';
 import { useChatInputStore } from '../store';
+import { ActionBarContext, type DropdownPlacement } from './context';
 
 const mapActionsToItems = (keys: ActionKeys[]): ChatInputActionsProps['items'] =>
   keys.map((actionKey, index) => {
@@ -34,11 +40,40 @@ const mapActionsToItems = (keys: ActionKeys[]): ChatInputActionsProps['items'] =
     }
   });
 
-const ActionToolbar = memo(() => {
-  const leftActions = useChatInputStore((s) => s.leftActions);
+export interface ActionToolbarProps {
+  dropdownPlacement?: DropdownPlacement;
+}
+
+const ActionToolbar = memo<ActionToolbarProps>(({ dropdownPlacement }) => {
+  const [expandInputActionbar, toggleExpandInputActionbar] = useGlobalStore((s) => [
+    systemStatusSelectors.expandInputActionbar(s),
+    s.toggleExpandInputActionbar,
+  ]);
+  const enableRichRender = useUserStore(labPreferSelectors.enableInputMarkdown);
+
+  const leftActions = useChatInputStore((s) =>
+    s.leftActions.filter((item) => (enableRichRender ? true : item !== 'typo')),
+  );
+
   const mobile = useChatInputStore((s) => s.mobile);
+
   const items = useMemo(() => mapActionsToItems(leftActions), [leftActions]);
-  return <ChatInputActions collapseOffset={mobile ? 48 : 80} items={items} />;
+
+  const contextValue = useMemo(() => ({ dropdownPlacement }), [dropdownPlacement]);
+
+  return (
+    <ActionBarContext.Provider value={contextValue}>
+      <ChatInputActions
+        collapseOffset={mobile ? 48 : 80}
+        defaultGroupCollapse={true}
+        groupCollapse={!expandInputActionbar}
+        items={items}
+        onGroupCollapseChange={(v) => {
+          toggleExpandInputActionbar(!v);
+        }}
+      />
+    </ActionBarContext.Provider>
+  );
 });
 
 export default ActionToolbar;

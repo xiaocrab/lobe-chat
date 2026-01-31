@@ -1,3 +1,5 @@
+import { ENABLE_BUSINESS_FEATURES } from '@lobechat/business-const';
+
 import { AiFullModelCard, LobeDefaultAiModelListItem } from '../types/aiModel';
 import { default as ai21 } from './ai21';
 import { default as ai302 } from './ai302';
@@ -10,8 +12,11 @@ import { default as azureai } from './azureai';
 import { default as baichuan } from './baichuan';
 import { default as bedrock } from './bedrock';
 import { default as bfl } from './bfl';
+import { default as cerebras } from './cerebras';
 import { default as cloudflare } from './cloudflare';
 import { default as cohere } from './cohere';
+import { default as cometapi } from './cometapi';
+import { default as comfyui } from './comfyui';
 import { default as deepseek } from './deepseek';
 import { default as fal } from './fal';
 import { default as fireworksai } from './fireworksai';
@@ -26,6 +31,7 @@ import { default as infiniai } from './infiniai';
 import { default as internlm } from './internlm';
 import { default as jina } from './jina';
 import { default as lmstudio } from './lmstudio';
+import { default as lobehub } from './lobehub/index';
 import { default as minimax } from './minimax';
 import { default as mistral } from './mistral';
 import { default as modelscope } from './modelscope';
@@ -35,12 +41,14 @@ import { default as newapi } from './newapi';
 import { default as novita } from './novita';
 import { default as nvidia } from './nvidia';
 import { default as ollama } from './ollama';
+import { default as ollamacloud } from './ollamacloud';
 import { default as openai } from './openai';
 import { default as openrouter } from './openrouter';
 import { default as perplexity } from './perplexity';
 import { default as ppio } from './ppio';
 import { default as qiniu } from './qiniu';
 import { default as qwen } from './qwen';
+import { default as replicate } from './replicate';
 import { default as sambanova } from './sambanova';
 import { default as search1api } from './search1api';
 import { default as sensenova } from './sensenova';
@@ -52,12 +60,15 @@ import { default as tencentcloud } from './tencentcloud';
 import { default as togetherai } from './togetherai';
 import { default as upstage } from './upstage';
 import { default as v0 } from './v0';
+import { default as vercelaigateway } from './vercelaigateway';
 import { default as vertexai } from './vertexai';
 import { default as vllm } from './vllm';
 import { default as volcengine } from './volcengine';
 import { default as wenxin } from './wenxin';
 import { default as xai } from './xai';
+import { default as xiaomimimo } from './xiaomimimo';
 import { default as xinference } from './xinference';
+import { default as zenmux } from './zenmux';
 import { default as zeroone } from './zeroone';
 import { default as zhipu } from './zhipu';
 
@@ -92,8 +103,11 @@ export const LOBE_DEFAULT_MODEL_LIST = buildDefaultModelList({
   baichuan,
   bedrock,
   bfl,
+  cerebras,
   cloudflare,
   cohere,
+  cometapi,
+  comfyui,
   deepseek,
   fal,
   fireworksai,
@@ -108,6 +122,7 @@ export const LOBE_DEFAULT_MODEL_LIST = buildDefaultModelList({
   internlm,
   jina,
   lmstudio,
+  ...(ENABLE_BUSINESS_FEATURES ? { lobehub } : {}),
   minimax,
   mistral,
   modelscope,
@@ -117,12 +132,14 @@ export const LOBE_DEFAULT_MODEL_LIST = buildDefaultModelList({
   novita,
   nvidia,
   ollama,
+  ollamacloud,
   openai,
   openrouter,
   perplexity,
   ppio,
   qiniu,
   qwen,
+  replicate,
   sambanova,
   search1api,
   sensenova,
@@ -134,12 +151,15 @@ export const LOBE_DEFAULT_MODEL_LIST = buildDefaultModelList({
   togetherai,
   upstage,
   v0,
+  vercelaigateway,
   vertexai,
   vllm,
   volcengine,
   wenxin,
   xai,
+  xiaomimimo,
   xinference,
+  zenmux,
   zeroone,
   zhipu,
 });
@@ -155,8 +175,11 @@ export { default as azureai } from './azureai';
 export { default as baichuan } from './baichuan';
 export { default as bedrock } from './bedrock';
 export { default as bfl } from './bfl';
+export { default as cerebras } from './cerebras';
 export { default as cloudflare } from './cloudflare';
 export { default as cohere } from './cohere';
+export { default as cometapi } from './cometapi';
+export { default as comfyui } from './comfyui';
 export { default as deepseek } from './deepseek';
 export { default as fal, fluxSchnellParamsSchema } from './fal';
 export { default as fireworksai } from './fireworksai';
@@ -171,7 +194,7 @@ export { default as infiniai } from './infiniai';
 export { default as internlm } from './internlm';
 export { default as jina } from './jina';
 export { default as lmstudio } from './lmstudio';
-export { default as lobehub } from './lobehub';
+export { default as lobehub } from './lobehub/index';
 export { default as minimax } from './minimax';
 export { default as mistral } from './mistral';
 export { default as modelscope } from './modelscope';
@@ -181,12 +204,14 @@ export { default as newapi } from './newapi';
 export { default as novita } from './novita';
 export { default as nvidia } from './nvidia';
 export { default as ollama } from './ollama';
+export { default as ollamacloud } from './ollamacloud';
 export { gptImage1ParamsSchema, default as openai, openaiChatModels } from './openai';
 export { default as openrouter } from './openrouter';
 export { default as perplexity } from './perplexity';
 export { default as ppio } from './ppio';
 export { default as qiniu } from './qiniu';
 export { default as qwen } from './qwen';
+export { default as replicate } from './replicate';
 export { default as sambanova } from './sambanova';
 export { default as search1api } from './search1api';
 export { default as sensenova } from './sensenova';
@@ -198,11 +223,14 @@ export { default as tencentcloud } from './tencentcloud';
 export { default as togetherai } from './togetherai';
 export { default as upstage } from './upstage';
 export { default as v0 } from './v0';
+export { default as vercelaigateway } from './vercelaigateway';
 export { default as vertexai } from './vertexai';
 export { default as vllm } from './vllm';
 export { default as volcengine } from './volcengine';
 export { default as wenxin } from './wenxin';
 export { default as xai } from './xai';
+export { default as xiaomimimo } from './xiaomimimo';
 export { default as xinference } from './xinference';
+export { default as zenmux } from './zenmux';
 export { default as zeroone } from './zeroone';
 export { default as zhipu } from './zhipu';

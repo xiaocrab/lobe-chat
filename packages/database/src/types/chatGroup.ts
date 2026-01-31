@@ -1,9 +1,8 @@
 export interface ChatGroupConfig {
-  maxResponseInRow?: number;
-  orchestratorModel?: string;
-  orchestratorProvider?: string;
-  responseOrder?: 'sequential' | 'natural';
-  responseSpeed?: 'slow' | 'medium' | 'fast';
+  allowDM?: boolean;
+  forkedFromIdentifier?: string;
+  openingMessage?: string;
+  openingQuestions?: string[];
   revealDM?: boolean;
   systemPrompt?: string;
 }

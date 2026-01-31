@@ -20,8 +20,8 @@ export const fluxKreaParamsSchema: ModelParamsSchema = {
 
 export const qwenImageParamsSchema: ModelParamsSchema = {
   cfg: { default: 2.5, max: 20, min: 0, step: 0.1 },
-  // 实测 fal 宽高 最大就支持到 1536
-  // 默认值取自 https://chat.qwen.ai/ 官网的默认值
+  // Tested: fal width/height max support up to 1536
+  // Default values from https://chat.qwen.ai/ official website
   height: { default: 1328, max: 1536, min: 512, step: 1 },
   prompt: { default: '' },
   seed: { default: null },
@@ -39,12 +39,81 @@ export const qwenEditParamsSchema: ModelParamsSchema = {
   width: { default: 1328, max: 1536, min: 512, step: 1 },
 };
 
+export const huanyuanImageParamsSchema: ModelParamsSchema = {
+  cfg: { default: 7.5, max: 20, min: 1, step: 0.1 },
+  prompt: { default: '' },
+  seed: { default: null },
+  size: {
+    default: 'square_hd',
+    enum: [
+      'square_hd',
+      'square',
+      'portrait_4_3',
+      'portrait_16_9',
+      'landscape_4_3',
+      'landscape_16_9',
+    ],
+  },
+  steps: { default: 28, max: 50, min: 1, step: 1 },
+};
+
 const falImageModels: AIImageModelCard[] = [
   {
-    description: '专注于图像编辑任务的FLUX.1模型，支持文本和图像输入。',
+    description:
+      'Nano Banana is Google’s newest, fastest, and most efficient native multimodal model, enabling image generation and editing through conversation.',
+    displayName: 'Nano Banana',
+    enabled: true,
+    id: 'fal-ai/nano-banana',
+    parameters: {
+      imageUrls: { default: [], maxCount: 10 },
+      prompt: {
+        default: '',
+      },
+    },
+    pricing: {
+      units: [{ name: 'imageGeneration', rate: 0.039, strategy: 'fixed', unit: 'image' }],
+    },
+    releasedAt: '2025-08-26',
+    type: 'image',
+  },
+  {
+    description:
+      'Seedream 4.0 is an image generation model from ByteDance Seed, supporting text and image inputs with highly controllable, high-quality image generation. It generates images from text prompts.',
+    displayName: 'Seedream 4.0',
+    enabled: true,
+    id: 'fal-ai/bytedance/seedream/v4',
+    parameters: {
+      height: { default: 1024, max: 4096, min: 1024, step: 1 },
+      imageUrls: { default: [], maxCount: 10, maxFileSize: 10 * 1024 * 1024 },
+      prompt: {
+        default: '',
+      },
+      seed: { default: null },
+      width: { default: 1024, max: 4096, min: 1024, step: 1 },
+    },
+    pricing: {
+      units: [{ name: 'imageGeneration', rate: 0.03, strategy: 'fixed', unit: 'image' }],
+    },
+    releasedAt: '2025-09-09',
+    type: 'image',
+  },
+  {
+    description: 'A powerful native multimodal image generation model.',
+    displayName: 'HunyuanImage 3.0',
+    enabled: true,
+    id: 'fal-ai/hunyuan-image/v3',
+    parameters: huanyuanImageParamsSchema,
+    pricing: {
+      units: [{ name: 'imageGeneration', rate: 0.1, strategy: 'fixed', unit: 'megapixel' }],
+    },
+    releasedAt: '2025-09-28',
+    type: 'image',
+  },
+  {
+    description: 'FLUX.1 model focused on image editing, supporting text and image inputs.',
     displayName: 'FLUX.1 Kontext [dev]',
     enabled: true,
-    id: 'flux-kontext/dev',
+    id: 'fal-ai/flux-kontext/dev',
     parameters: {
       imageUrl: { default: null },
       prompt: { default: '' },
@@ -59,10 +128,10 @@ const falImageModels: AIImageModelCard[] = [
   },
   {
     description:
-      'FLUX.1 Kontext [pro] 能够处理文本和参考图像作为输入，无缝实现目标性的局部编辑和复杂的整体场景变换。',
+      'FLUX.1 Kontext [pro] accepts text and reference images as input, enabling targeted local edits and complex global scene transformations.',
     displayName: 'FLUX.1 Kontext [pro]',
     enabled: true,
-    id: 'flux-pro/kontext',
+    id: 'fal-ai/flux-pro/kontext',
     parameters: {
       aspectRatio: {
         default: '1:1',
@@ -79,10 +148,11 @@ const falImageModels: AIImageModelCard[] = [
     type: 'image',
   },
   {
-    description: 'FLUX.1 [schnell] 是一个具有120亿参数的图像生成模型，专注于快速生成高质量图像。',
+    description:
+      'FLUX.1 [schnell] is a 12B-parameter image generation model built for fast, high-quality output.',
     displayName: 'FLUX.1 Schnell',
     enabled: true,
-    id: 'flux/schnell',
+    id: 'fal-ai/flux/schnell',
     parameters: fluxSchnellParamsSchema,
     pricing: {
       units: [{ name: 'imageGeneration', rate: 0.003, strategy: 'fixed', unit: 'megapixel' }],
@@ -91,10 +161,11 @@ const falImageModels: AIImageModelCard[] = [
     type: 'image',
   },
   {
-    description: 'Flux Krea [dev] 是一个有美学偏好的图像生成模型，目标是生成更加真实、自然的图像。',
+    description:
+      'Flux Krea [dev] is an image generation model with an aesthetic bias toward more realistic, natural images.',
     displayName: 'FLUX.1 Krea [dev]',
     enabled: true,
-    id: 'flux/krea',
+    id: 'fal-ai/flux/krea',
     parameters: fluxKreaParamsSchema,
     pricing: {
       units: [{ name: 'imageGeneration', rate: 0.025, strategy: 'fixed', unit: 'megapixel' }],
@@ -103,10 +174,10 @@ const falImageModels: AIImageModelCard[] = [
     type: 'image',
   },
   {
-    description: 'Google 提供的高质量的图像生成模型',
+    description: 'High-quality image generation model from Google.',
     displayName: 'Imagen 4',
     enabled: true,
-    id: 'imagen4/preview',
+    id: 'fal-ai/imagen4/preview',
     organization: 'Deepmind',
     parameters: {
       aspectRatio: {
@@ -124,23 +195,23 @@ const falImageModels: AIImageModelCard[] = [
   },
   {
     description:
-      'Qwen 团队发布的专业图像编辑模型，支持语义编辑和外观编辑，能够精确编辑中英文文字，实现风格转换、对象旋转等高质量图像编辑。',
+      'A professional image editing model from the Qwen team that supports semantic and appearance edits, precisely edits Chinese and English text, and enables high-quality edits such as style transfer and object rotation.',
     displayName: 'Qwen Edit',
     enabled: true,
-    id: 'qwen-image-edit',
+    id: 'fal-ai/qwen-image-edit',
     parameters: qwenEditParamsSchema,
     pricing: {
-      units: [{ name: 'imageGeneration', rate: 0.025, strategy: 'fixed', unit: 'image' }],
+      units: [{ name: 'imageGeneration', rate: 0.03, strategy: 'fixed', unit: 'megapixel' }],
     },
     releasedAt: '2025-08-19',
     type: 'image',
   },
   {
     description:
-      'Qwen 团队带来的强大生图模型，具有令人印象深刻的中文文字生成能力和多样图片视觉风格。',
+      'A powerful image generation model from the Qwen team with impressive Chinese text rendering and diverse visual styles.',
     displayName: 'Qwen Image',
     enabled: true,
-    id: 'qwen-image',
+    id: 'fal-ai/qwen-image',
     parameters: qwenImageParamsSchema,
     pricing: {
       units: [{ name: 'imageGeneration', rate: 0.02, strategy: 'fixed', unit: 'megapixel' }],

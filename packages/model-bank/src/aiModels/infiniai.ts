@@ -1,20 +1,39 @@
 import { AIChatModelCard } from '../types/aiModel';
 
 // https://cloud.infini-ai.com/genstudio/model
-// All models are currently free
-// Currently the platform doesn't support Function Call
 
 const infiniaiChatModels: AIChatModelCard[] = [
   {
     abilities: {
+      functionCall: true,
       reasoning: true,
     },
-    contextWindowTokens: 65_536,
+    contextWindowTokens: 262_144,
     description:
-      'DeepSeek-R1 是一个专注于推理能力的大语言模型，通过创新的训练流程实现了与 OpenAI-o1 相当的数学、代码和推理任务表现。该模型采用了冷启动数据和大规模强化学习相结合的方式进行训练。',
-    displayName: 'DeepSeek R1',
-    enabled: true,
-    id: 'deepseek-r1',
+      "Kimi K2 Thinking is the latest and most powerful open-source reasoning model. It significantly expands multi-step reasoning depth and maintains stable tool use across 200-300 consecutive tool calls, setting new records on Humanity's Last Exam (HLE), BrowseComp, and other benchmarks. It also excels in coding, math, logical reasoning, and agent scenarios. Built on a MoE architecture with about 1T total parameters, it supports a 256K context window and tool calling.",
+    displayName: 'Kimi K2 Thinking',
+    id: 'kimi-k2-thinking',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 4, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 16, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    releasedAt: '2025-11-07',
+    type: 'chat',
+  },
+  {
+    abilities: {
+      vision: true,
+    },
+    contextWindowTokens: 8192,
+    description:
+      'DeepSeek-OCR is a vision-language model from DeepSeek AI focused on OCR and "contextual optical compression." It explores compressing contextual information from images, efficiently processes documents, and converts them into structured text formats such as Markdown. It accurately recognizes text in images, making it ideal for document digitization, text extraction, and structured processing.',
+    displayName: 'DeepSeek OCR',
+    id: 'deepseek-ocr',
+    maxOutput: 8192,
     pricing: {
       currency: 'CNY',
       units: [
@@ -22,20 +41,26 @@ const infiniaiChatModels: AIChatModelCard[] = [
         { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
+    releasedAt: '2025-10-20',
     type: 'chat',
   },
   {
-    contextWindowTokens: 65_536,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 200_000,
     description:
-      'DeepSeek-V3-0324 是一个强大的专家混合（MoE）语言模型，总参数量为 671B，每个 Token 激活 37B 参数。该模型采用多头潜在注意力（MLA）和 DeepSeekMoE 架构，实现了高效推理和经济训练，并在前代 DeepSeek-V3 的基础上显著提升了性能。',
-    displayName: 'DeepSeek V3 0324',
+      'MiniMax-M2.1 is the latest version of the MiniMax series, optimized for multilingual programming and real-world complex tasks. As an AI-native model, MiniMax-M2.1 achieves significant improvements in model performance, agent framework support, and multi-scenario adaptation, aiming to help enterprises and individuals find AI-native work and lifestyle more quickly.',
+    displayName: 'MiniMax M2.1',
     enabled: true,
-    id: 'deepseek-v3',
+    id: 'minimax-m2.1',
+    maxOutput: 200_000,
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 2.1, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 8.4, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',
@@ -45,17 +70,128 @@ const infiniaiChatModels: AIChatModelCard[] = [
       functionCall: true,
       reasoning: true,
     },
-    contextWindowTokens: 128_000,
+    contextWindowTokens: 200_000,
     description:
-      'Qwen3-235B-A22B 是 Qwen 系列第三代的大型语言模型，采用混合专家（MoE）架构，总计 2350 亿参数，每 token 激活 220 亿参数。支持无缝切换思考模式（复杂推理）和非思考模式（通用对话），在数学、编码、常识推理及多语言指令执行中表现出色。',
-    displayName: 'Qwen3 235B A22B',
+      'MiniMax-M2 is a Mixture of Experts (MoE) language model optimized for coding and agent workflows, with approximately 230B total parameters and approximately 10B active parameters. While maintaining strong general intelligence, it is deeply enhanced for developer scenarios such as multi-file editing, code-run-fix loops, and test validation fixes, demonstrating stable and efficient performance in real environments like terminals, IDEs, and CI.',
+    displayName: 'MiniMax M2',
+    id: 'minimax-m2',
+    maxOutput: 200_000,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2.1, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 8.4, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'GLM-4.7 is the latest large language model launched by Zhipu AI, with enhanced reasoning and generation capabilities.',
+    displayName: 'GLM-4.7',
     enabled: true,
-    id: 'qwen3-235b-a22b',
+    id: 'glm-4.7',
+    maxOutput: 4096,
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 3, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 14, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'GLM-4.6 is the latest large language model launched by Zhipu AI, with enhanced reasoning and generation capabilities.',
+    displayName: 'GLM-4.6',
+    id: 'glm-4.6',
+    maxOutput: 4096,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 3, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 14, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'DeepSeek-V3.2-Exp is an experimental DeepSeek LLM with stronger reasoning and generation.',
+    displayName: 'DeepSeek V3.2 Exp',
+    id: 'deepseek-v3.2-exp',
+    maxOutput: 65_536,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 3, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      vision: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'Qwen3 VL 235B A22B Instruct is a multimodal model from Qwen, supporting vision understanding and reasoning.',
+    displayName: 'Qwen3 VL 235B A22B Instruct',
+    id: 'qwen3-vl-235b-a22b-instruct',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 8, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      vision: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'Qwen3 VL 235B A22B Thinking is a multimodal reasoning model from Qwen, supporting vision understanding and reasoning.',
+    displayName: 'Qwen3 VL 235B A22B Thinking',
+    id: 'qwen3-vl-235b-a22b-thinking',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 20, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',
@@ -65,17 +201,253 @@ const infiniaiChatModels: AIChatModelCard[] = [
       functionCall: true,
       reasoning: true,
     },
-    contextWindowTokens: 128_000,
+    contextWindowTokens: 131_072,
     description:
-      'Qwen3-30B-A3B 是 Qwen 系列第三代的大型语言模型，采用混合专家（MoE）架构，总计 305 亿参数，每 token 激活 33 亿参数。支持无缝切换思维模式（复杂推理）和非思维模式（通用对话），在数学、编码、常识推理及多语言指令执行中表现出色。',
-    displayName: 'Qwen3 30B A3B',
-    enabled: true,
-    id: 'qwen3-30b-a3b',
+      'DeepSeek-V3.1-Terminus is a terminal-optimized LLM from DeepSeek, tailored for terminal devices.',
+    displayName: 'DeepSeek V3.1 Terminus',
+    id: 'deepseek-v3.1-terminus',
+    maxOutput: 65_536,
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 4, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 12, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'A next-generation thinking-mode open-source model based on Qwen3. Compared to the previous version (Qwen3-235B-A22B-Thinking-2507), it improves instruction following and provides more concise summaries.',
+    displayName: 'Qwen3 Next 80B A3B Thinking',
+    id: 'qwen3-next-80b-a3b-thinking',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 1, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 10, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'A next-generation non-thinking open-source model based on Qwen3. Compared to the previous version (Qwen3-235B-A22B-Instruct-2507), it has better Chinese text understanding, stronger logical reasoning, and improved text generation performance.',
+    displayName: 'Qwen3 Next 80B A3B Instruct',
+    id: 'qwen3-next-80b-a3b-instruct',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 1, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 10, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'DeepSeek V3.1 uses a hybrid reasoning architecture with both thinking and non-thinking modes.',
+    displayName: 'DeepSeek V3.1',
+    id: 'deepseek-v3.1',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 4, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 12, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      reasoning: true,
+    },
+    contextWindowTokens: 64_000,
+    description: 'Baichuan M2 32B is a MoE model from Baichuan Intelligence with strong reasoning.',
+    displayName: 'Baichuan M2 32B',
+    id: 'baichuan-m2-32b',
+    maxOutput: 8192,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 11.6, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      vision: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'GLM-4.5V is a multimodal model from Zhipu AI for vision understanding and reasoning.',
+    displayName: 'GLM-4.5V',
+    id: 'glm-4.5v',
+    maxOutput: 4096,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 4, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 12, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'GLM-4.5 is a hybrid reasoning model from Zhipu AI built for agents, with thinking and non-thinking modes.',
+    displayName: 'GLM-4.5',
+    id: 'glm-4.5',
+    maxOutput: 4096,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 8, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    contextWindowTokens: 131_072,
+    description: 'GLM-4.5-Air is a lightweight LLM from Zhipu AI with efficient reasoning.',
+    displayName: 'GLM-4.5-Air',
+    id: 'glm-4.5-air',
+    maxOutput: 4096,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 0.6, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 4, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+    },
+    contextWindowTokens: 262_144,
+    description:
+      'The open-source Qwen code model. The latest qwen3-coder-480b-a35b-instruct is a Qwen3-based code generation model with strong coding-agent capabilities, good at tool use and environment interaction, enabling autonomous programming while retaining strong general abilities.',
+    displayName: 'Qwen3 Coder 480B A35B',
+    id: 'qwen3-coder-480b-a35b-instruct',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 9, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 36, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'A non-thinking open-source model based on Qwen3. Compared to the previous version (Qwen3-235B-A22B), it slightly improves subjective creative ability and model safety.',
+    displayName: 'Qwen3 235B A22B Instruct 2507',
+    id: 'qwen3-235b-a22b-instruct-2507',
+    maxOutput: 8192,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 8, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+    },
+    contextWindowTokens: 131_072,
+    description: 'Kimi K2 Instruct is a Moonshot AI LLM with ultra-long context handling.',
+    displayName: 'Kimi K2 Instruct',
+    id: 'kimi-k2-instruct',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 4, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 16, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      reasoning: true,
+    },
+    contextWindowTokens: 32_000,
+    description:
+      'ERNIE 4.5 300B A47B is Baidu ERNIE’s ultra-large MoE model with excellent reasoning.',
+    displayName: 'ERNIE 4.5 300B A47B',
+    id: 'ernie-4.5-300b-a47b',
+    maxOutput: 8192,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    contextWindowTokens: 120_000,
+    description:
+      'ERNIE 4.5 21B A3B is Baidu ERNIE’s MoE model with strong reasoning and multilingual abilities.',
+    displayName: 'ERNIE 4.5 21B A3B',
+    id: 'ernie-4.5-21b-a3b',
+    maxOutput: 8192,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 1, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 1, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',
@@ -85,58 +457,110 @@ const infiniaiChatModels: AIChatModelCard[] = [
       functionCall: true,
       reasoning: true,
     },
-    contextWindowTokens: 128_000,
+    contextWindowTokens: 131_072,
     description:
-      'Qwen3-32B 是 Qwen 系列第三代的大型语言模型，拥有 328 亿参数，专为高效推理和多语言任务设计。支持无缝切换思考模式（复杂推理）和非思考模式（通用对话），在数学、编码、常识推理及多语言指令执行中表现出色。',
-    displayName: 'Qwen3 32B',
-    enabled: true,
-    id: 'qwen3-32b',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-      reasoning: true,
-    },
-    contextWindowTokens: 128_000,
-    description:
-      'Qwen3-14B 是 Qwen 系列第三代的大型语言模型，拥有 148 亿参数，专为高效推理和多语言任务设计。支持无缝切换思维模式（复杂推理）和非思维模式（通用对话），在数学、编码、常识推理及多语言指令执行中表现出色。',
-    displayName: 'Qwen3 14B',
-    enabled: false,
-    id: 'qwen3-14b',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-      reasoning: true,
-    },
-    contextWindowTokens: 128_000,
-    description:
-      'Qwen3-8B 是 Qwen 系列第三代的大型语言模型，拥有 82 亿参数，专为高效推理和多语言任务设计。支持无缝切换思考模式（复杂推理）和非思考模式（通用对话），在数学、编码、常识推理及多语言指令执行中表现出色。',
+      'Qwen3-8B is the third-generation Qwen LLM with 8.2B parameters, designed for efficient reasoning and multilingual tasks. It supports seamless switching between thinking mode (complex reasoning) and non-thinking mode (general chat), excelling in math, coding, commonsense reasoning, and multilingual instruction following.',
     displayName: 'Qwen3 8B',
-    enabled: false,
     id: 'qwen3-8b',
+    maxOutput: 8192,
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 1, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 4, strategy: 'fixed', unit: 'millionTokens' },
       ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'Qwen3-14B is the third-generation Qwen LLM with 14.8B parameters, designed for efficient reasoning and multilingual tasks. It supports seamless switching between thinking mode (complex reasoning) and non-thinking mode (general chat), excelling in math, coding, commonsense reasoning, and multilingual instruction following.',
+    displayName: 'Qwen3 14B',
+    id: 'qwen3-14b',
+    maxOutput: 8192,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 8, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'Qwen3-32B is the third-generation Qwen LLM with 32.8B parameters, designed for efficient reasoning and multilingual tasks. It supports seamless switching between thinking mode (complex reasoning) and non-thinking mode (general chat), excelling in math, coding, commonsense reasoning, and multilingual instruction following.',
+    displayName: 'Qwen3 32B',
+    id: 'qwen3-32b',
+    maxOutput: 8192,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 11.6, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'Qwen3-30B-A3B is a third-generation Qwen LLM using a MoE architecture with 30.5B total parameters and 3.3B active per token. It supports seamless switching between thinking mode (complex reasoning) and non-thinking mode (general chat), excelling in math, coding, commonsense reasoning, and multilingual instruction following.',
+    displayName: 'Qwen3 30B A3B',
+    id: 'qwen3-30b-a3b',
+    maxOutput: 8192,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2.2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 8.7, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'Qwen3-235B-A22B is a third-generation Qwen LLM using a MoE architecture with 235B total parameters and 22B active per token. It supports seamless switching between thinking mode (complex reasoning) and non-thinking mode (general chat), excelling in math, coding, commonsense reasoning, and multilingual instruction following.',
+    displayName: 'Qwen3 235B A22B',
+    id: 'qwen3-235b-a22b',
+    maxOutput: 8192,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 5, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 20, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    settings: {
+      extendParams: ['enableReasoning'],
     },
     type: 'chat',
   },
@@ -146,15 +570,15 @@ const infiniaiChatModels: AIChatModelCard[] = [
     },
     contextWindowTokens: 125_000,
     description:
-      'Qwen2.5-VL 系列模型提升了模型的智能水平、实用性和适用性，使其在自然对话、内容创作、专业知识服务及代码开发等场景中表现更优。旗舰模型 Qwen2.5-VL-72B-Instruct 在涵盖多个领域和任务的基准测试中展现出强大的竞争力，包括大学水平的问题解答、数学、文档理解、通用问答、视频理解以及视觉代理任务等。',
+      'The Qwen2.5-VL series improves intelligence, practicality, and applicability, performing better in natural dialogue, content creation, professional knowledge services, and code development. The flagship Qwen2.5-VL-72B-Instruct is highly competitive across benchmarks spanning many domains and tasks, including college-level QA, math, document understanding, general QA, video understanding, and visual agent tasks.',
     displayName: 'Qwen2.5 VL 72B Instruct',
-    enabled: true,
     id: 'qwen2.5-vl-72b-instruct',
+    maxOutput: 4096,
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 10, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 10, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',
@@ -165,15 +589,15 @@ const infiniaiChatModels: AIChatModelCard[] = [
     },
     contextWindowTokens: 125_000,
     description:
-      'Qwen2.5-VL 系列模型提升了模型的智能水平、实用性和适用性，使其在自然对话、内容创作、专业知识服务及代码开发等场景中表现更优。32B 版本使用了强化学习技术优化模型，与 Qwen2.5 VL 系列的其它模型相比，提供了更符合人类偏好的输出风格、复杂数学问题的推理能力，以及图像细粒度理解与推理能力。',
+      'The Qwen2.5-VL series improves intelligence, practicality, and applicability, performing better in natural dialogue, content creation, professional knowledge services, and code development. Qwen2.5-VL-32B-Instruct is highly competitive across benchmarks spanning many domains and tasks, including college-level QA, math, document understanding, general QA, video understanding, and visual agent tasks.',
     displayName: 'Qwen2.5 VL 32B Instruct',
-    enabled: true,
     id: 'qwen2.5-vl-32b-instruct',
+    maxOutput: 4096,
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 5.8, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 5.8, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',
@@ -184,9 +608,97 @@ const infiniaiChatModels: AIChatModelCard[] = [
     },
     contextWindowTokens: 125_000,
     description:
-      'Qwen2.5-VL 系列模型提升了模型的智能水平、实用性和适用性，使其在自然对话、内容创作、专业知识服务及代码开发等场景中表现更优。',
+      'The Qwen2.5-VL series improves intelligence, practicality, and applicability, performing better in natural dialogue, content creation, professional knowledge services, and code development. Qwen2.5-VL-7B-Instruct is highly competitive across benchmarks spanning many domains and tasks, including college-level QA, math, document understanding, general QA, video understanding, and visual agent tasks.',
     displayName: 'Qwen2.5 VL 7B Instruct',
     id: 'qwen2.5-vl-7b-instruct',
+    maxOutput: 4096,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      reasoning: true,
+    },
+    contextWindowTokens: 32_000,
+    description: 'QwQ 32B is a Qwen reasoning-focused model built for reasoning tasks.',
+    displayName: 'QwQ 32B',
+    id: 'qwq-32b',
+    maxOutput: 8192,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    contextWindowTokens: 131_072,
+    description:
+      'DeepSeek-V3-0324 is a powerful MoE LLM with 671B total parameters and 37B active per token. It uses Multi-Head Latent Attention (MLA) and the DeepSeekMoE architecture for efficient reasoning and economical training, and significantly improves over the previous DeepSeek-V3.',
+    displayName: 'DeepSeek V3 0324',
+    id: 'deepseek-v3',
+    maxOutput: 16_384,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 8, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'DeepSeek-R1 is an LLM focused on reasoning, achieving performance comparable to OpenAI o1 on math, code, and reasoning tasks through an innovative training pipeline. It is trained with a combination of cold-start data and large-scale reinforcement learning.',
+    displayName: 'DeepSeek R1',
+    id: 'deepseek-r1',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 4, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 16, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      reasoning: true,
+    },
+    contextWindowTokens: 32_000,
+    description: 'DeepSeek R1 Distill Qwen 32B is a DeepSeek distilled model based on Qwen.',
+    displayName: 'DeepSeek R1 Distill Qwen 32B',
+    id: 'deepseek-r1-distill-qwen-32b',
+    maxOutput: 8192,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    contextWindowTokens: 32_000,
+    description: 'Megrez 3B Instruct is a small, efficient model from Wuwen Xinqiong.',
+    displayName: 'Megrez 3B Instruct',
+    id: 'megrez-3b-instruct',
+    maxOutput: 4096,
     pricing: {
       currency: 'CNY',
       units: [
@@ -202,49 +714,32 @@ const infiniaiChatModels: AIChatModelCard[] = [
     },
     contextWindowTokens: 32_768,
     description:
-      'Qwen2.5 是 Qwen 大型语言模型系列的最新成果。Qwen2.5 发布了从 0.5 到 720 亿参数不等的基础语言模型及指令调优语言模型。Qwen2.5 相比 Qwen2 带来了以下改进：\n显著增加知识量，在编程与数学领域的能力得到极大提升。\n在遵循指令、生成长文本、理解结构化数据 (例如，表格) 以及生成结构化输出特别是 JSON 方面有显著提升。对系统提示的多样性更具韧性，增强了聊天机器人中的角色扮演实现和条件设定。\n支持长上下文处理。\n支持超过 29 种语言的多语言功能，包括中文、英语、法语、西班牙语、葡萄牙语、德语、意大利语、俄语、日语、韩语、越南语、泰语、阿拉伯语等。',
-    displayName: 'Qwen2.5 72B Instruct',
-    enabled: true,
-    id: 'qwen2.5-72b-instruct',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    abilities: {
-      functionCall: true,
-    },
-    contextWindowTokens: 32_768,
-    description:
-      'Qwen2.5 是 Qwen 大型语言模型系列的最新成果。Qwen2.5 发布了从 0.5 到 720 亿参数不等的基础语言模型及指令调优语言模型。Qwen2.5 相比 Qwen2 带来了以下改进：\n显著增加知识量，在编程与数学领域的能力得到极大提升。\n在遵循指令、生成长文本、理解结构化数据 (例如，表格) 以及生成结构化输出特别是 JSON 方面有显著提升。对系统提示的多样性更具韧性，增强了聊天机器人中的角色扮演实现和条件设定。\n支持长上下文处理。\n支持超过 29 种语言的多语言功能，包括中文、英语、法语、西班牙语、葡萄牙语、德语、意大利语、俄语、日语、韩语、越南语、泰语、阿拉伯语等。',
+      'Qwen2.5 is the latest in the Qwen LLM series. It releases base and instruction-tuned models ranging from 0.5B to 72B parameters. Compared with Qwen2, Qwen2.5 brings:\nSignificantly more knowledge, with major gains in coding and math.\nStronger instruction following, long-text generation, structured data understanding (e.g., tables), and structured output especially JSON. More robust to diverse system prompts, improving roleplay and conditioning in chatbots.\nLong-context support.\nMultilingual support for 29+ languages, including Chinese, English, French, Spanish, Portuguese, German, Italian, Russian, Japanese, Korean, Vietnamese, Thai, Arabic, and more.',
     displayName: 'Qwen2.5 32B Instruct',
-    enabled: true,
     id: 'qwen2.5-32b-instruct',
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',
   },
   {
+    abilities: {
+      functionCall: true,
+    },
     contextWindowTokens: 32_768,
     description:
-      'Qwen2.5-Coder 是最新的代码专用 Qwen 大型语言模型系列。Qwen2.5-Coder 在 CodeQwen1.5 的基础上带来了以下改进：\n显著提升代码生成、代码推理和代码修复能力。\n支持真实世界应用，例如代码代理，增强编码能力和数学及一般能力。\n支持长上下文处理。',
-    displayName: 'Qwen2.5 Coder 32B Instruct',
-    id: 'qwen2.5-coder-32b-instruct',
+      'Qwen2.5 is the latest in the Qwen LLM series. It releases base and instruction-tuned models ranging from 0.5B to 72B parameters. Compared with Qwen2, Qwen2.5 brings:\nSignificantly more knowledge, with major gains in coding and math.\nStronger instruction following, long-text generation, structured data understanding (e.g., tables), and structured output especially JSON. More robust to diverse system prompts, improving roleplay and conditioning in chatbots.\nLong-context support.\nMultilingual support for 29+ languages, including Chinese, English, French, Spanish, Portuguese, German, Italian, Russian, Japanese, Korean, Vietnamese, Thai, Arabic, and more.',
+    displayName: 'Qwen2.5 72B Instruct',
+    id: 'qwen2.5-72b-instruct',
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 5, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 5, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',
@@ -252,14 +747,14 @@ const infiniaiChatModels: AIChatModelCard[] = [
   {
     contextWindowTokens: 32_768,
     description:
-      'Qwen2.5 是 Qwen 大型语言模型系列的最新成果。Qwen2.5 发布了从 0.5 到 720 亿参数不等的基础语言模型及指令调优语言模型。Qwen2.5 相比 Qwen2 带来了以下改进：\n显著增加知识量，在编程与数学领域的能力得到极大提升。\n在遵循指令、生成长文本、理解结构化数据 (例如，表格) 以及生成结构化输出特别是 JSON 方面有显著提升。对系统提示的多样性更具韧性，增强了聊天机器人中的角色扮演实现和条件设定。\n支持长上下文处理。\n支持超过 29 种语言的多语言功能，包括中文、英语、法语、西班牙语、葡萄牙语、德语、意大利语、俄语、日语、韩语、越南语、泰语、阿拉伯语等。',
+      'Qwen2.5 is the latest in the Qwen LLM series. It releases base and instruction-tuned models ranging from 0.5B to 72B parameters. Compared with Qwen2, Qwen2.5 brings:\nSignificantly more knowledge, with major gains in coding and math.\nStronger instruction following, long-text generation, structured data understanding (e.g., tables), and structured output especially JSON. More robust to diverse system prompts, improving roleplay and conditioning in chatbots.\nLong-context support.\nMultilingual support for 29+ languages, including Chinese, English, French, Spanish, Portuguese, German, Italian, Russian, Japanese, Korean, Vietnamese, Thai, Arabic, and more.',
     displayName: 'Qwen2.5 14B Instruct',
     id: 'qwen2.5-14b-instruct',
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',
@@ -270,14 +765,14 @@ const infiniaiChatModels: AIChatModelCard[] = [
     },
     contextWindowTokens: 32_768,
     description:
-      'Qwen2.5 是 Qwen 大型语言模型系列的最新成果。Qwen2.5 发布了从 0.5 到 720 亿参数不等的基础语言模型及指令调优语言模型。Qwen2.5 相比 Qwen2 带来了以下改进：\n显著增加知识量，在编程与数学领域的能力得到极大提升。\n在遵循指令、生成长文本、理解结构化数据 (例如，表格) 以及生成结构化输出特别是 JSON 方面有显著提升。对系统提示的多样性更具韧性，增强了聊天机器人中的角色扮演实现和条件设定。\n支持长上下文处理。\n支持超过 29 种语言的多语言功能，包括中文、英语、法语、西班牙语、葡萄牙语、德语、意大利语、俄语、日语、韩语、越南语、泰语、阿拉伯语等。',
+      'Qwen2.5 is the latest in the Qwen LLM series. It releases base and instruction-tuned models ranging from 0.5B to 72B parameters. Compared with Qwen2, Qwen2.5 brings:\nSignificantly more knowledge, with major gains in coding and math.\nStronger instruction following, long-text generation, structured data understanding (e.g., tables), and structured output especially JSON. More robust to diverse system prompts, improving roleplay and conditioning in chatbots.\nLong-context support.\nMultilingual support for 29+ languages, including Chinese, English, French, Spanish, Portuguese, German, Italian, Russian, Japanese, Korean, Vietnamese, Thai, Arabic, and more.',
     displayName: 'Qwen2.5 7B Instruct',
     id: 'qwen2.5-7b-instruct',
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 1, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 1, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',
@@ -285,170 +780,83 @@ const infiniaiChatModels: AIChatModelCard[] = [
   {
     abilities: {
       functionCall: true,
+    },
+    contextWindowTokens: 32_768,
+    description:
+      'Qwen2.5-Coder is the latest code-focused Qwen LLM series. Compared to CodeQwen1.5, it brings:\nSignificant improvements in code generation, code reasoning, and code repair.\nSupport for real-world applications such as code agents, improving coding plus math and general abilities.\nLong-context support.',
+    displayName: 'Qwen2.5 Coder 32B Instruct',
+    id: 'qwen2.5-coder-32b-instruct',
+    maxOutput: 4096,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 2.9, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    contextWindowTokens: 131_072,
+    description:
+      'Access requires an application. GPT-OSS-120B is an open-source large language model from OpenAI with strong text generation capability.',
+    displayName: 'GPT-OSS-120B',
+    id: 'gpt-oss-120b',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 0.8, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 3.2, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    contextWindowTokens: 131_072,
+    description:
+      'Access requires an application. GPT-OSS-20B is an open-source mid-size language model from OpenAI with efficient text generation.',
+    displayName: 'GPT-OSS-20B',
+    id: 'gpt-oss-20b',
+    maxOutput: 32_768,
+    pricing: {
+      currency: 'CNY',
+      units: [
+        { name: 'textInput', rate: 0.4, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 1.6, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
       reasoning: true,
     },
-    contextWindowTokens: 65_536,
-    description:
-      'QwQ 是 Qwen 系列的推理模型，相比传统指令调优模型，QwQ 具备思考和推理能力，在下游任务尤其是难题上能取得显著性能提升。QwQ-32B 是一款中等规模的推理模型，其性能可与最先进的推理模型相媲美，例如 DeepSeek-R1 和 o1-mini。',
-    displayName: 'QwQ 32B',
-    enabled: false,
-    id: 'qwq-32b',
+    contextWindowTokens: 131_072,
+    description: 'Enterprise dedicated service model with bundled concurrency.',
+    displayName: 'DeepSeek R1 (Pro)',
+    id: 'pro-deepseek-r1',
+    maxOutput: 32_768,
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 4, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 16, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',
   },
   {
-    contextWindowTokens: 32_768,
-    description:
-      'DeepSeek-R1-Distill-Qwen-32B 是基于 DeepSeek-R1 蒸馏而来的模型，在 Qwen2.5-32B 的基础上使用 DeepSeek-R1 生成的样本进行微调。该模型在各种基准测试中表现出色，保持了强大的推理能力。',
-    displayName: 'DeepSeek R1 Distill Qwen 32B',
-    enabled: false,
-    id: 'deepseek-r1-distill-qwen-32b',
+    contextWindowTokens: 131_072,
+    description: 'Enterprise dedicated service model with bundled concurrency.',
+    displayName: 'DeepSeek V3 (Pro)',
+    id: 'pro-deepseek-v3',
+    maxOutput: 16_384,
     pricing: {
       currency: 'CNY',
       units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    contextWindowTokens: 8192,
-    description:
-      'Meta 发布的 LLaMA 3.3 多语言大规模语言模型（LLMs）是一个经过预训练和指令微调的生成模型，提供 70B 规模（文本输入/文本输出）。该模型使用超过 15T 的数据进行训练，支持英语、德语、法语、意大利语、葡萄牙语、印地语、西班牙语和泰语，知识更新截止于 2023 年 12 月。',
-    displayName: 'LLaMA 3.3 70B',
-    enabled: false,
-    id: 'llama-3.3-70b-instruct',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    contextWindowTokens: 32_768,
-    description:
-      'Qwen2 是 Qwen 团队推出的新一代大型语言模型系列。它基于 Transformer 架构，并采用 SwiGLU 激活函数、注意力 QKV 偏置(attention QKV bias)、群组查询注意力(group query attention)、滑动窗口注意力(mixture of sliding window attention)与全注意力的混合等技术。此外，Qwen 团队还改进了适应多种自然语言和代码的分词器。',
-    displayName: 'Qwen 2 72B Instruct',
-    id: 'qwen2-72b-instruct',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    contextWindowTokens: 32_768,
-    description:
-      'Qwen2 是 Qwen 团队推出的新一代大型语言模型系列。它基于 Transformer 架构，并采用 SwiGLU 激活函数、注意力 QKV 偏置(attention QKV bias)、群组查询注意力(group query attention)、滑动窗口注意力(mixture of sliding window attention)与全注意力的混合等技术。此外，Qwen 团队还改进了适应多种自然语言和代码的分词器。',
-    displayName: 'Qwen 2 7B Instruct',
-    id: 'qwen2-7b-instruct',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    contextWindowTokens: 4096,
-    description:
-      'Yi-1.5 是 Yi 的升级版本。 它使用 500B Tokens 的高质量语料库在 Yi 上持续进行预训练，并在 3M 个多样化的微调样本上进行微调。',
-    displayName: 'Yi-1.5 34B Chat',
-    id: 'yi-1.5-34b-chat',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    contextWindowTokens: 16_384,
-    description: 'GLM-4-9B-Chat 是智谱 AI 推出的最新一代预训练模型 GLM-4-9B 的人类偏好对齐版本。',
-    displayName: 'GLM-4 9B Chat',
-    id: 'glm-4-9b-chat',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    contextWindowTokens: 8192,
-    description:
-      'ChatGLM3 是智谱 AI 与清华 KEG 实验室发布的闭源模型，经过海量中英标识符的预训练与人类偏好对齐训练，相比一代模型在 MMLU、C-Eval、GSM8K 分别取得了 16%、36%、280% 的提升，并登顶中文任务榜单 C-Eval。适用于对知识量、推理能力、创造力要求较高的场景，比如广告文案、小说写作、知识类写作、代码生成等。',
-    displayName: 'ChatGLM3',
-    id: 'chatglm3',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    contextWindowTokens: 32_768,
-    description:
-      'ChatGLM3-6b-base 是由智谱开发的 ChatGLM 系列最新一代的 60 亿参数规模的开源的基础模型。',
-    displayName: 'ChatGLM3 6B Base',
-    id: 'chatglm3-6b-base',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    contextWindowTokens: 4096,
-    description:
-      'Llama2 是由 Meta 开发并开源的大型语言模型（LLM）系列，这是一组从 70 亿到 700 亿参数不同规模、经过预训练和微调的生成式文本模型。架构层面，LLama2 是一个使用优化型转换器架构的自动回归语言模型。调整后的版本使用有监督的微调（SFT）和带有人类反馈的强化学习（RLHF）以对齐人类对有用性和安全性的偏好。Llama2 较 Llama 系列在多种学术数据集上有着更加不俗的表现，为大量其他模型提供了设计和开发的思路。',
-    displayName: 'Llama 2 7B Chat',
-    id: 'llama-2-7b-chat',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
-    type: 'chat',
-  },
-  {
-    contextWindowTokens: 4096,
-    description:
-      'Megrez-3B-Instruct 是由无问芯穹完全自主训练的大语言模型。Megrez-3B-Instruct 旨在通过软硬协同理念，打造一款极速推理、小巧精悍、极易上手的端侧智能解决方案。',
-    displayName: 'Megrez 3B Instruct',
-    id: 'megrez-3b-instruct',
-    pricing: {
-      currency: 'CNY',
-      units: [
-        { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 8, strategy: 'fixed', unit: 'millionTokens' },
       ],
     },
     type: 'chat',

@@ -1,16 +1,16 @@
-import { CategoryItem, CategoryListQuery } from '@lobehub/market-sdk';
+import {
+  type DiscoverPluginDetail,
+  type IdentifiersResponse,
+  type PluginListResponse,
+  type PluginQueryParams,
+} from '@lobechat/types';
+import { type CategoryItem, type CategoryListQuery } from '@lobehub/market-sdk';
 import useSWR, { type SWRResponse } from 'swr';
 import type { StateCreator } from 'zustand/vanilla';
 
 import { discoverService } from '@/services/discover';
-import { DiscoverStore } from '@/store/discover';
+import { type DiscoverStore } from '@/store/discover';
 import { globalHelpers } from '@/store/global/helpers';
-import {
-  DiscoverPluginDetail,
-  IdentifiersResponse,
-  PluginListResponse,
-  PluginQueryParams,
-} from '@/types/discover';
 
 export interface PluginAction {
   usePluginCategories: (params: CategoryListQuery) => SWRResponse<CategoryItem[]>;

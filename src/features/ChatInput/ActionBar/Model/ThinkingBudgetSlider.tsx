@@ -1,7 +1,6 @@
-import { InputNumber } from '@lobehub/ui';
+import { Flexbox, InputNumber } from '@lobehub/ui';
 import { Slider } from 'antd';
 import { memo, useMemo } from 'react';
-import { Flexbox } from 'react-layout-kit';
 import useMergeState from 'use-merge-value';
 
 // 定义特殊值映射
@@ -27,14 +26,37 @@ const SLIDER_TO_VALUE_MAP = [
 
 // 从实际值获取滑块位置
 const getSliderPosition = (value: number): number => {
-  const index = SLIDER_TO_VALUE_MAP.indexOf(value);
-  return index === -1 ? 0 : index;
+  const exactIndex = SLIDER_TO_VALUE_MAP.indexOf(value);
+  if (exactIndex !== -1) return exactIndex;
+
+  if (value <= SPECIAL_VALUES.AUTO) return 0;
+  if (value > SPECIAL_VALUES.OFF && value <= 128) return 2;
+
+  let position = 0;
+
+  for (const [index, mappedValue] of SLIDER_TO_VALUE_MAP.entries()) {
+    if (mappedValue <= value) {
+      position = index;
+      continue;
+    }
+
+    break;
+  }
+
+  return position;
 };
 
 // 从滑块位置获取实际值（修复：0 不再被当作 falsy）
 const getValueFromPosition = (position: number): number => {
   const v = SLIDER_TO_VALUE_MAP[position];
   return v === undefined ? SPECIAL_VALUES.AUTO : v;
+};
+
+const getStepForValue = (value: number): number => {
+  if (value < 0) return 1;
+  if (value <= 1024) return 128;
+  if (value < 8192) return 1024;
+  return 2048;
 };
 
 interface ThinkingBudgetSliderProps {
@@ -64,6 +86,8 @@ const ThinkingBudgetSlider = memo<ThinkingBudgetSliderProps>(
     const updateWithRealValue = (value: number) => {
       setBudget(value);
     };
+
+    const inputStep = useMemo(() => getStepForValue(budget), [budget]);
 
     const marks = useMemo(() => {
       return {
@@ -97,6 +121,7 @@ const ThinkingBudgetSlider = memo<ThinkingBudgetSliderProps>(
         </Flexbox>
         <div>
           <InputNumber
+            changeOnWheel
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             formatter={(value, _info) => {
               if (value === SPECIAL_VALUES.AUTO) return 'Auto';
@@ -120,7 +145,7 @@ const ThinkingBudgetSlider = memo<ThinkingBudgetSliderProps>(
               }
               return SPECIAL_VALUES.AUTO;
             }}
-            step={128}
+            step={inputStep}
             style={{ width: 80 }}
             value={budget}
           />

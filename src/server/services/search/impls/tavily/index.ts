@@ -1,11 +1,10 @@
+import { type SearchParams, type UniformSearchResponse, type UniformSearchResult } from '@lobechat/types';
 import { TRPCError } from '@trpc/server';
 import debug from 'debug';
 import urlJoin from 'url-join';
 
-import { SearchParams, UniformSearchResponse, UniformSearchResult } from '@/types/tool/search';
-
-import { SearchServiceImpl } from '../type';
-import { TavilySearchParameters, TavilyResponse } from './type';
+import { type SearchServiceImpl } from '../type';
+import { type TavilyResponse, type TavilySearchParameters } from './type';
 
 const log = debug('lobe-search:Tavily');
 
@@ -34,7 +33,7 @@ export class TavilyImpl implements SearchServiceImpl {
       include_raw_content: false,
       max_results: 15,
       query,
-      search_depth: process.env.TAVILY_SEARCH_DEPTH || 'basic' // basic or advanced
+      search_depth: process.env.TAVILY_SEARCH_DEPTH || 'basic', // basic or advanced
     };
 
     let body: TavilySearchParameters = {
@@ -43,9 +42,8 @@ export class TavilyImpl implements SearchServiceImpl {
         params?.searchTimeRange && params.searchTimeRange !== 'anytime'
           ? params.searchTimeRange
           : undefined,
-      topic:
-        // Tavily 只支持 news 和 general 两种类型
-        params?.searchCategories?.filter(cat => ['news', 'general'].includes(cat))?.[0],
+      topic: // Tavily only supports news and general types
+      params?.searchCategories?.filter((cat) => ['news', 'general'].includes(cat))?.[0],
     };
 
     log('Constructed request body: %o', body);

@@ -62,11 +62,13 @@ describe('aiModelSelectors', () => {
     ],
     activeProviderModelList: [],
     aiProviderConfigUpdatingIds: [],
+    aiProviderDetailMap: {},
     aiProviderList: [],
     aiProviderLoadingIds: [],
     providerSearchKeyword: '',
     aiProviderRuntimeConfig: {},
     initAiProviderList: false,
+    isInitAiProviderRuntimeState: false,
   };
 
   describe('aiProviderChatModelListIds', () => {

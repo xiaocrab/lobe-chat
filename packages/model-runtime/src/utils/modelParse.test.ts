@@ -1,6 +1,5 @@
+import type { ChatModelCard } from '@lobechat/types';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
-import type { ChatModelCard } from '@/types/llm';
 
 import {
   MODEL_LIST_CONFIGS,
@@ -95,11 +94,29 @@ const mockDefaultModelList: (Partial<ChatModelCard> & { id: string })[] = [
     enabled: false,
     id: 'model-known-disabled',
   },
+  {
+    displayName: 'Known Model With Settings',
+    enabled: true,
+    id: 'model-known-settings',
+    settings: {
+      extendParams: ['enableReasoning'],
+      searchImpl: 'params',
+      searchProvider: 'builtin',
+    },
+  },
 ];
 
 // Mock the import
 vi.mock('model-bank', () => ({
   LOBE_DEFAULT_MODEL_LIST: mockDefaultModelList,
+  // 新增 provider 专用清单，供 findKnownModelByProvider 使用
+  google: [
+    {
+      id: 'gemini-2.5-pro',
+      displayName: 'Gemini 2.5 Pro',
+      abilities: { search: true, functionCall: true, reasoning: true, vision: true },
+    },
+  ],
 }));
 
 describe('modelParse', () => {
@@ -138,6 +155,8 @@ describe('modelParse', () => {
       expect(detectModelProvider('deepseek-coder')).toBe('deepseek');
       expect(detectModelProvider('doubao-pro')).toBe('volcengine');
       expect(detectModelProvider('yi-large')).toBe('zeroone');
+      expect(detectModelProvider('comfyui/flux-dev')).toBe('comfyui');
+      expect(detectModelProvider('comfyui/sdxl-model')).toBe('comfyui');
     });
 
     it('should default to OpenAI when no provider is detected', () => {
@@ -149,6 +168,14 @@ describe('modelParse', () => {
       expect(detectModelProvider('GPT-4')).toBe('openai');
       expect(detectModelProvider('Claude-3')).toBe('anthropic');
       expect(detectModelProvider('QWEN-TURBO')).toBe('qwen');
+    });
+  });
+
+  // New sanity tests for your added config
+  describe('MODEL_LIST_CONFIGS sanity', () => {
+    it('google.imageOutputKeywords should include "-image-" for image-output capability inference', () => {
+      expect(MODEL_LIST_CONFIGS.google.imageOutputKeywords).toBeDefined();
+      expect(MODEL_LIST_CONFIGS.google.imageOutputKeywords).toContain('-image-');
     });
   });
 
@@ -221,6 +248,60 @@ describe('modelParse', () => {
       expect(Array.isArray(result)).toBe(true);
     });
 
+    // New search & imageOutput focused tests for single provider path
+    describe('search and imageOutput (processModelList)', () => {
+      it('openai: default search keywords should make "*-search" models support search', async () => {
+        // openai config does not define searchKeywords, so DEFAULT_SEARCH_KEYWORDS ['-search'] applies
+        const out = await processModelList(
+          [{ id: 'gpt-4o-search' }],
+          MODEL_LIST_CONFIGS.openai,
+          'openai',
+        );
+        expect(out).toHaveLength(1);
+        expect(out[0].search).toBe(true);
+      });
+
+      it('openai: models without "-search" should not get search by default', async () => {
+        const out = await processModelList([{ id: 'gpt-4o' }], MODEL_LIST_CONFIGS.openai, 'openai');
+        expect(out).toHaveLength(1);
+        expect(out[0].search).toBe(false);
+      });
+
+      it('openai: "-search" models with excluded keywords (audio) should not get search', async () => {
+        const out = await processModelList(
+          [{ id: 'gpt-4o-search-audio' }],
+          MODEL_LIST_CONFIGS.openai,
+          'openai',
+        );
+        expect(out).toHaveLength(1);
+        expect(out[0].search).toBe(false);
+      });
+
+      it('google: gemini-* with "-image-" in id should infer imageOutput=true via keywords and remain chat type', async () => {
+        const out = await processModelList(
+          [{ id: 'gemini-2.5-image-pro' }],
+          MODEL_LIST_CONFIGS.google,
+          'google',
+        );
+        expect(out).toHaveLength(1);
+        expect(out[0].imageOutput).toBe(true);
+        // due to '!gemini' exclusion in IMAGE_MODEL_KEYWORDS
+        expect(out[0].type).toBe('chat');
+      });
+
+      it('google: gemini-* without "-image-" should not infer imageOutput and get search=true via known google model', async () => {
+        const out = await processModelList(
+          [{ id: 'gemini-2.5-pro' }],
+          MODEL_LIST_CONFIGS.google,
+          'google',
+        );
+        expect(out).toHaveLength(1);
+        expect(out[0].displayName).toBe('Gemini 2.5 Pro');
+        expect(out[0].search).toBe(true);
+        expect(out[0].imageOutput).toBe(false);
+      });
+    });
+
     describe('Detailed capability and property processing in processModelList', () => {
       const config = MODEL_LIST_CONFIGS.openai;
 
@@ -291,6 +372,36 @@ describe('modelParse', () => {
         expect(result.find((m) => m.id === 'model-known-disabled')!.enabled).toBe(false);
         expect(result.find((m) => m.id === 'unknown-model-for-enabled-test')!.enabled).toBe(false);
       });
+
+      it('should include settings from known model when remote data does not provide them', async () => {
+        const modelList = [{ id: 'model-known-settings' }];
+        const result = await processModelList(modelList, config);
+
+        const settings = result[0].settings;
+        expect(settings).toBeDefined();
+        expect(settings?.extendParams).toEqual(['enableReasoning']);
+        expect(settings?.searchImpl).toBe('params');
+        expect(settings?.searchProvider).toBe('builtin');
+      });
+
+      it('should merge extendParams from known and remote models while preserving uniqueness', async () => {
+        const modelList = [
+          {
+            id: 'model-known-settings',
+            settings: {
+              extendParams: ['reasoningBudgetToken', 'enableReasoning'],
+              searchImpl: 'tool',
+            },
+          },
+        ];
+
+        const result = await processModelList(modelList, config);
+        const settings = result[0].settings;
+
+        expect(settings?.extendParams).toEqual(['enableReasoning', 'reasoningBudgetToken']);
+        expect(settings?.searchImpl).toBe('tool');
+        expect(settings?.searchProvider).toBe('builtin');
+      });
     });
   });
 
@@ -301,21 +412,28 @@ describe('modelParse', () => {
         { id: 'claude-3-opus' }, // anthropic
         { id: 'gemini-pro' }, // google
         { id: 'qwen-turbo' }, // qwen
+        { id: 'comfyui/flux-dev', parameters: { width: 1024, height: 1024 } }, // comfyui
       ];
 
       const result = await processMultiProviderModelList(modelList);
-      expect(result).toHaveLength(4);
+      expect(result).toHaveLength(5);
 
       const gpt4 = result.find((model) => model.id === 'gpt-4')!;
       const claude = result.find((model) => model.id === 'claude-3-opus')!;
       const gemini = result.find((model) => model.id === 'gemini-pro')!;
       const qwen = result.find((model) => model.id === 'qwen-turbo')!;
+      const comfyui = result.find((model) => model.id === 'comfyui/flux-dev')!;
 
       // Check abilities based on their respective provider configs and knownModels
       expect(gpt4.reasoning).toBe(false); // From knownModel (gpt-4)
       expect(claude.functionCall).toBe(true); // From knownModel (claude-3-opus)
       expect(gemini.functionCall).toBe(true); // From google keyword 'gemini'
       expect(qwen.functionCall).toBe(true); // From knownModel (qwen-turbo)
+
+      // ComfyUI models should have no chat capabilities (all false)
+      expect(comfyui.functionCall).toBe(false); // ComfyUI config has empty arrays
+      expect(comfyui.reasoning).toBe(false); // ComfyUI config has empty arrays
+      expect(comfyui.vision).toBe(false); // ComfyUI config has empty arrays
     });
 
     it('should recognize model capabilities based on keyword detection across providers', async () => {
@@ -410,6 +528,47 @@ describe('modelParse', () => {
       expect(model.functionCall).toBe(false); // 从 knownModel.abilities.functionCall
       expect(model.vision).toBe(false); // 从 knownModel.abilities.vision
       expect(model.reasoning).toBe(true); // 从 knownModel.abilities.reasoning
+    });
+
+    // New search & imageOutput focused tests for multi-provider path
+    describe('search and imageOutput (processMultiProviderModelList)', () => {
+      it('non-google provider gemini-2.5-pro should still get search=true via known google model', async () => {
+        // Simulate a mixed/custom list. Even if called with providerid='openai',
+        // detectModelProvider('gemini-2.5-pro') => 'google'
+        // knownModel (google list) has abilities.search=true, so final search=true
+        const out = await processMultiProviderModelList([{ id: 'gemini-2.5-pro' }], 'openai');
+        expect(out).toHaveLength(1);
+        const m = out[0];
+        expect(m.id).toBe('gemini-2.5-pro');
+        expect(m.displayName).toBe('Gemini 2.5 Pro');
+        expect(m.search).toBe(true);
+      });
+
+      it('default search keywords should make "*-search" models support search', async () => {
+        const out = await processMultiProviderModelList([{ id: 'gpt-4o-search' }]);
+        expect(out).toHaveLength(1);
+        expect(out[0].search).toBe(true);
+      });
+
+      it('google: gemini-* with "-image-" in id should infer imageOutput=true via keywords', async () => {
+        const out = await processMultiProviderModelList([{ id: 'gemini-2.5-image-pro' }]);
+        expect(out).toHaveLength(1);
+        expect(out[0].imageOutput).toBe(true);
+        // and still a chat model due to "!gemini" image-type exclusion
+        expect(out[0].type).toBe('chat');
+      });
+
+      it('openai: "-search" + "audio" should be suppressed by excludeKeywords', async () => {
+        const out = await processMultiProviderModelList([{ id: 'gpt-4o-search-audio' }], 'openai');
+        expect(out).toHaveLength(1);
+        expect(out[0].search).toBe(false);
+      });
+
+      it('google: gemini-* without "-image-" should not infer imageOutput', async () => {
+        const out = await processMultiProviderModelList([{ id: 'gemini-2.5-pro' }]);
+        expect(out).toHaveLength(1);
+        expect(out[0].imageOutput).toBe(false);
+      });
     });
 
     describe('Extended tests for detectModelProvider', () => {
@@ -561,6 +720,140 @@ describe('modelParse', () => {
 
         // Zhipu: 'glm-4v' 是 vision 关键词
         expect(glm.vision).toBe(true);
+      });
+
+      it('should include known extendParams for OpenAI and Google providers regardless of providerid', async () => {
+        const mockModule = await import('model-bank');
+        mockModule.LOBE_DEFAULT_MODEL_LIST.push(
+          {
+            id: 'gpt-openai-extend-restricted',
+            displayName: 'OpenAI Extend Restricted',
+            settings: {
+              extendParams: ['openaiParam'],
+            },
+          } as any,
+          {
+            id: 'gemini-extend-restricted',
+            displayName: 'Gemini Extend Restricted',
+            settings: {
+              extendParams: ['thinkingBudget', 'urlContext'],
+            },
+          } as any,
+        );
+
+        const modelList = [
+          { id: 'gpt-openai-extend-restricted' },
+          { id: 'gemini-extend-restricted' },
+        ];
+
+        const result = await processMultiProviderModelList(modelList, 'vercelaigateway');
+
+        const openaiModel = result.find((m) => m.id === 'gpt-openai-extend-restricted');
+        const googleModel = result.find((m) => m.id === 'gemini-extend-restricted');
+
+        // Both OpenAI and Google providers always include known extendParams
+        expect(openaiModel?.settings?.extendParams).toEqual(['openaiParam']);
+        expect(googleModel?.settings?.extendParams).toEqual(['thinkingBudget', 'urlContext']);
+      });
+
+      it('should allow known extendParams for non-OpenAI providers when provider is aihubmix', async () => {
+        const mockModule = await import('model-bank');
+        mockModule.LOBE_DEFAULT_MODEL_LIST.push({
+          id: 'gemini-extend-aihubmix',
+          displayName: 'Gemini Extend Aihubmix',
+          settings: {
+            extendParams: ['thinkingBudget', 'urlContext'],
+          },
+        } as any);
+
+        const modelList = [{ id: 'gemini-extend-aihubmix' }];
+
+        const result = await processMultiProviderModelList(modelList, 'aihubmix');
+
+        const googleModel = result.find((m) => m.id === 'gemini-extend-aihubmix');
+
+        expect(googleModel?.settings?.extendParams).toEqual(['thinkingBudget', 'urlContext']);
+      });
+
+      it('should omit search settings when provider is neither aihubmix nor newapi', async () => {
+        const mockModule = await import('model-bank');
+        const initialLength = mockModule.LOBE_DEFAULT_MODEL_LIST.length;
+        mockModule.LOBE_DEFAULT_MODEL_LIST.push({
+          id: 'search-settings-model',
+          displayName: 'Search Settings Model',
+          settings: {
+            searchImpl: 'params',
+            searchProvider: 'builtin',
+          },
+        } as any);
+
+        try {
+          const result = await processMultiProviderModelList(
+            [{ id: 'search-settings-model' }],
+            'vercelaigateway',
+          );
+
+          const model = result.find((m) => m.id === 'search-settings-model');
+
+          expect(model?.settings?.searchImpl).toBeUndefined();
+          expect(model?.settings?.searchProvider).toBeUndefined();
+        } finally {
+          mockModule.LOBE_DEFAULT_MODEL_LIST.splice(initialLength);
+        }
+      });
+
+      it('should include search settings when provider is aihubmix', async () => {
+        const mockModule = await import('model-bank');
+        const initialLength = mockModule.LOBE_DEFAULT_MODEL_LIST.length;
+        mockModule.LOBE_DEFAULT_MODEL_LIST.push({
+          id: 'search-settings-aihubmix',
+          displayName: 'Search Settings Aihubmix',
+          settings: {
+            searchImpl: 'params',
+            searchProvider: 'builtin',
+          },
+        } as any);
+
+        try {
+          const result = await processMultiProviderModelList(
+            [{ id: 'search-settings-aihubmix' }],
+            'aihubmix',
+          );
+
+          const model = result.find((m) => m.id === 'search-settings-aihubmix');
+
+          expect(model?.settings?.searchImpl).toBe('params');
+          expect(model?.settings?.searchProvider).toBe('builtin');
+        } finally {
+          mockModule.LOBE_DEFAULT_MODEL_LIST.splice(initialLength);
+        }
+      });
+
+      it('should include search settings when provider is newapi', async () => {
+        const mockModule = await import('model-bank');
+        const initialLength = mockModule.LOBE_DEFAULT_MODEL_LIST.length;
+        mockModule.LOBE_DEFAULT_MODEL_LIST.push({
+          id: 'search-settings-newapi',
+          displayName: 'Search Settings NewAPI',
+          settings: {
+            searchImpl: 'params',
+            searchProvider: 'builtin',
+          },
+        } as any);
+
+        try {
+          const result = await processMultiProviderModelList(
+            [{ id: 'search-settings-newapi' }],
+            'newapi',
+          );
+
+          const model = result.find((m) => m.id === 'search-settings-newapi');
+
+          expect(model?.settings?.searchImpl).toBe('params');
+          expect(model?.settings?.searchProvider).toBe('builtin');
+        } finally {
+          mockModule.LOBE_DEFAULT_MODEL_LIST.splice(initialLength);
+        }
       });
 
       it('should correctly handle models with excluded keywords in different providers', async () => {

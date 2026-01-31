@@ -1,10 +1,8 @@
 // @vitest-environment node
+import { AsyncTaskStatus, ImageGenerationAsset } from '@lobechat/types';
+import { FileSource } from '@lobechat/types';
 import { eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { LobeChatDatabase } from '../../type';import { AsyncTaskStatus } from '@/types/asyncTask';
-import { FileSource } from '@/types/files';
-import { ImageGenerationAsset } from '@/types/generation';
 
 import {
   NewGeneration,
@@ -15,8 +13,9 @@ import {
   generations,
   users,
 } from '../../schemas';
+import { LobeChatDatabase } from '../../type';
 import { GenerationModel } from '../generation';
-import { getTestDB } from './_util';
+import { getTestDB } from '../../core/getTestDB';
 
 const serverDB: LobeChatDatabase = await getTestDB();
 

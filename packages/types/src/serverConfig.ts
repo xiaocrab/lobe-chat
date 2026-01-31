@@ -1,18 +1,47 @@
 import type { PartialDeep } from 'type-fest';
 
-import { IFeatureFlags } from '@/config/featureFlags';
+import { IFeatureFlagsState } from '@/config/featureFlags';
 
 import { ChatModelCard } from './llm';
-import { GlobalLLMProviderKey, UserDefaultAgent, UserSystemAgentConfig } from './user/settings';
+import {
+  GlobalLLMProviderKey,
+  UserDefaultAgent,
+  UserImageConfig,
+  UserSystemAgentConfig,
+} from './user/settings';
+
+export type GlobalMemoryLayer = 'activity' | 'context' | 'experience' | 'identity' | 'preference';
+
+export interface MemoryAgentPublicConfig {
+  baseURL?: string;
+  contextLimit?: number;
+  model?: string;
+  provider?: string;
+}
+
+export interface MemoryLayerExtractorPublicConfig extends MemoryAgentPublicConfig {
+  layers?: Partial<Record<GlobalMemoryLayer, string>>;
+}
+
+export interface GlobalMemoryExtractionConfig {
+  agentGateKeeper: MemoryAgentPublicConfig;
+  agentLayerExtractor: MemoryLayerExtractorPublicConfig;
+  concurrency?: number;
+  embedding?: MemoryAgentPublicConfig;
+}
+
+export interface GlobalMemoryConfig {
+  userMemory?: GlobalMemoryExtractionConfig;
+}
 
 export interface ServerModelProviderConfig {
   enabled?: boolean;
   enabledModels?: string[];
   fetchOnClient?: boolean;
   /**
-   * the model cards defined in server
+   * the model lists defined in server
    */
-  serverModelCards?: ChatModelCard[];
+  serverModelLists?: ChatModelCard[];
 }
 
 export type ServerLanguageModel = Partial<Record<GlobalLLMProviderKey, ServerModelProviderConfig>>;
@@ -20,16 +49,20 @@ export type ServerLanguageModel = Partial<Record<GlobalLLMProviderKey, ServerMod
 export interface GlobalServerConfig {
   aiProvider: ServerLanguageModel;
   defaultAgent?: PartialDeep<UserDefaultAgent>;
+  disableEmailPassword?: boolean;
+  enableBusinessFeatures?: boolean;
+  enableEmailVerification?: boolean;
+  enableKlavis?: boolean;
+  enableLobehubSkill?: boolean;
+  enableMagicLink?: boolean;
+  enableMarketTrustedClient?: boolean;
   enableUploadFileToServer?: boolean;
-  enabledAccessCode?: boolean;
   /**
    * @deprecated
    */
   enabledOAuthSSO?: boolean;
-  /**
-   * @deprecated
-   */
-  languageModel?: ServerLanguageModel;
+  image?: PartialDeep<UserImageConfig>;
+  memory?: GlobalMemoryConfig;
   oAuthSSOProviders?: string[];
   systemAgent?: PartialDeep<UserSystemAgentConfig>;
   telemetry: {
@@ -39,5 +72,5 @@ export interface GlobalServerConfig {
 
 export interface GlobalRuntimeConfig {
   serverConfig: GlobalServerConfig;
-  serverFeatureFlags: IFeatureFlags;
+  serverFeatureFlags: IFeatureFlagsState;
 }

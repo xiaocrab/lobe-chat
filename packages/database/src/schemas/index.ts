@@ -1,9 +1,10 @@
 export * from './agent';
+export * from './agentCronJob';
 export * from './aiInfra';
 export * from './apiKey';
 export * from './asyncTask';
+export * from './betterAuth';
 export * from './chatGroup';
-export * from './document';
 export * from './file';
 export * from './generation';
 export * from './message';
@@ -16,3 +17,4 @@ export * from './relations';
 export * from './session';
 export * from './topic';
 export * from './user';
+export * from './userMemories';

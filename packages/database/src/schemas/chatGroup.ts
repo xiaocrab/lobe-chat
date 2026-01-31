@@ -1,21 +1,20 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix  */
 import {
   boolean,
+  index,
   integer,
   jsonb,
   pgTable,
   primaryKey,
   text,
   uniqueIndex,
-  varchar,
 } from 'drizzle-orm/pg-core';
-import { createInsertSchema } from 'drizzle-zod';
 
-import { idGenerator } from '@/database/utils/idGenerator';
-import type { ChatGroupConfig } from '@/database/types/chatGroup';
-
+import type { ChatGroupConfig } from '../types/chatGroup';
+import { idGenerator } from '../utils/idGenerator';
 import { timestamps } from './_helpers';
 import { agents } from './agent';
+import { sessionGroups } from './session';
 import { users } from './user';
 
 /**
@@ -31,10 +30,12 @@ export const chatGroups = pgTable(
       .notNull(),
     title: text('title'),
     description: text('description'),
+    avatar: text('avatar'),
+    backgroundColor: text('background_color'),
+    marketIdentifier: text('market_identifier'),
+    content: text('content'),
+    editorData: jsonb('editor_data').$type<Record<string, any>>(),
 
-    /**
-     * Group configuration
-     */
     config: jsonb('config').$type<ChatGroupConfig>(),
 
     clientId: text('client_id'),
@@ -43,14 +44,18 @@ export const chatGroups = pgTable(
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
 
+    groupId: text('group_id').references(() => sessionGroups.id, { onDelete: 'set null' }),
+
     pinned: boolean('pinned').default(false),
 
     ...timestamps,
   },
-  (t) => [uniqueIndex('chat_groups_client_id_user_id_unique').on(t.clientId, t.userId)],
+  (t) => [
+    uniqueIndex('chat_groups_client_id_user_id_unique').on(t.clientId, t.userId),
+    index('chat_groups_user_id_idx').on(t.userId),
+    index('chat_groups_group_id_idx').on(t.groupId),
+  ],
 );
-
-export const insertChatGroupSchema = createInsertSchema(chatGroups);
 
 export type NewChatGroup = typeof chatGroups.$inferInsert;
 export type ChatGroupItem = typeof chatGroups.$inferSelect;
@@ -91,8 +96,9 @@ export const chatGroupsAgents = pgTable(
   },
   (t) => ({
     pk: primaryKey({ columns: [t.chatGroupId, t.agentId] }),
+    userIdIdx: index('chat_groups_agents_user_id_idx').on(t.userId),
   }),
 );
 
 export type NewChatGroupAgent = typeof chatGroupsAgents.$inferInsert;
-export type ChatGroupAgentItem = typeof agents.$inferInsert
+export type ChatGroupAgentItem = typeof chatGroupsAgents.$inferSelect;

@@ -1,6 +1,5 @@
 export * from './dataSync';
-export * from './dispatch';
-export * from './localFile';
+export * from './localSystem';
 export * from './mcpInstall';
 export * from './notification';
 export * from './proxy';
@@ -11,3 +10,4 @@ export * from './system';
 export * from './tray';
 export * from './update';
 export * from './upload';
+export * from './window';

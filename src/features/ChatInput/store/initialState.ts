@@ -1,8 +1,8 @@
-import type { IEditor } from '@lobehub/editor';
+import { type IEditor, type SlashOptions } from '@lobehub/editor';
 import type { ChatInputProps } from '@lobehub/editor/react';
-import type { MenuProps } from '@lobehub/ui/es/Menu';
+import type { MenuProps } from '@lobehub/ui';
 
-import { ActionKeys } from '@/features/ChatInput';
+import { type ActionKeys } from '@/features/ChatInput';
 
 export type SendButtonHandler = (params: {
   clearContent: () => void;
@@ -24,9 +24,11 @@ export const initialSendButtonState: SendButtonProps = {
 };
 
 export interface PublicState {
+  agentId?: string;
   allowExpand?: boolean;
   expand?: boolean;
   leftActions: ActionKeys[];
+  mentionItems?: SlashOptions['items'];
   mobile?: boolean;
   onMarkdownContentChange?: (content: string) => void;
   onSend?: SendButtonHandler;

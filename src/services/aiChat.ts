@@ -1,4 +1,4 @@
-import { SendMessageServerParams } from '@lobechat/types';
+import { type SendMessageServerParams, type StructureOutputParams } from '@lobechat/types';
 import { cleanObject } from '@lobechat/utils';
 
 import { lambdaClient } from '@/libs/trpc/client';
@@ -9,6 +9,13 @@ class AiChatService {
     abortController: AbortController,
   ) => {
     return lambdaClient.aiChat.sendMessageInServer.mutate(cleanObject(params), {
+      context: { showNotification: false },
+      signal: abortController?.signal,
+    });
+  };
+
+  generateJSON = async (params: StructureOutputParams, abortController: AbortController) => {
+    return lambdaClient.aiChat.outputJSON.mutate(params, {
       context: { showNotification: false },
       signal: abortController?.signal,
     });

@@ -1,100 +1,83 @@
 # CLAUDE.md
 
-This document serves as a shared guideline for all team members when using Claude Code in this repository.
+Guidelines for using Claude Code in this LobeChat repository.
 
 ## Tech Stack
 
-read @.cursor/rules/project-introduce.mdc
+- Next.js 16 + React 19 + TypeScript
+- SPA inside Next.js with `react-router-dom`
+- `@lobehub/ui`, antd for components; antd-style for CSS-in-JS
+- react-i18next for i18n; zustand for state management
+- SWR for data fetching; TRPC for type-safe backend
+- Drizzle ORM with PostgreSQL; Vitest for testing
 
-## Directory Structure
+## Project Structure
 
-read @.cursor/rules/project-structure.mdc
+```
+lobe-chat/
+├── apps/desktop/           # Electron desktop app
+├── packages/               # Shared packages (@lobechat/*)
+│   ├── database/           # Database schemas, models, repositories
+│   ├── agent-runtime/      # Agent runtime
+│   └── ...
+├── src/
+│   ├── app/                # Next.js app router
+│   ├── store/              # Zustand stores
+│   ├── services/           # Client services
+│   ├── server/             # Server services and routers
+│   └── ...
+└── e2e/                    # E2E tests (Cucumber + Playwright)
+```
 
 ## Development
 
 ### Git Workflow
 
-- use rebase for git pull
-- git commit message should prefix with gitmoji
-- git branch name format example: tj/feat/feature-name
-- use .github/PULL_REQUEST_TEMPLATE.md to generate pull request description
+- Use rebase for `git pull`
+- Commit messages: prefix with gitmoji
+- Branch format: `<type>/<feature-name>`
+- PR titles with `✨ feat/` or `🐛 fix` trigger releases
 
 ### Package Management
 
-This repository adopts a monorepo structure.
-
-- Use `pnpm` as the primary package manager for dependency management
-- Use `bun` to run npm scripts
-- Use `bunx` to run executable npm packages
-
-### TypeScript Code Style Guide
-
-see @.cursor/rules/typescript.mdc
-
-### Modify Code Rules
-
-- **Code Language**:
-  - For files with existing Chinese comments: Continue using Chinese to maintain consistency
-  - For new files or files without Chinese comments: MUST use American English.
-    - eg: new react tsx file and new test file
-- Conservative for existing code, modern approaches for new features
+- `pnpm` for dependency management
+- `bun` to run npm scripts
+- `bunx` for executable npm packages
 
 ### Testing
 
-Testing work follows the Rule-Aware Task Execution system above.
+```bash
+# Run specific test (NEVER run `bun run test` - takes ~10 minutes)
+bunx vitest run --silent='passed-only' '[file-path]'
 
-- **Required Rule**: `testing-guide/testing-guide.mdc`
-- **Command**:
-  - web: `bunx vitest run --silent='passed-only' '[file-path-pattern]'`
-  - packages(eg: database): `cd packages/database && bunx vitest run --silent='passed-only' '[file-path-pattern]'`
+# Database package
+cd packages/database && bunx vitest run --silent='passed-only' '[file]'
+```
 
-**Important**:
-
-- wrapped the file path in single quotes to avoid shell expansion
-- Never run `bun run test` etc to run tests, this will run all tests and cost about 10mins
-- If try to fix the same test twice, but still failed, stop and ask for help.
-
-### Typecheck
-
-- use `bun run type-check` to check type errors.
+- Prefer `vi.spyOn` over `vi.mock`
+- Tests must pass type check: `bun run type-check`
+- After 2 failed fix attempts, stop and ask for help
 
 ### i18n
 
-- **Keys**: Add to `src/locales/default/namespace.ts`
-- **Dev**: Translate `locales/zh-CN/namespace.json` locale file only for preview
-- DON'T run `pnpm i18n`, let CI auto handle it
+- Add keys to `src/locales/default/namespace.ts`
+- For dev preview: translate `locales/zh-CN/` and `locales/en-US/`
+- Don't run `pnpm i18n` - CI handles it
 
-## Rules Index
+## Linear Issue Management
 
-Some useful rules of this project. Read them when needed.
+**Trigger conditions** - when ANY of these occur, apply Linear workflow:
 
-**IMPORTANT**: All rule files referenced in this document are located in the `.cursor/rules/` directory. Throughout this document, rule files are referenced by their filename only for brevity.
+- User mentions issue ID like `LOBE-XXX`
+- User says "linear", "link linear", "linear issue"
+- Creating PR that references a Linear issue
 
-### 📋 Complete Rule Files
+**Workflow:**
 
-**Core Development**
+1. Use `ToolSearch` to confirm `linear-server` MCP exists (search `linear` or `mcp__linear-server__`)
+2. If found, read `.agents/skills/linear/SKILL.md` and follow the workflow
+3. If not found, skip Linear integration (treat as not installed)
 
-- `backend-architecture.mdc` - Three-layer architecture, data flow
-- `react-component.mdc` - antd-style, Lobe UI usage
-- `drizzle-schema-style-guide.mdc` - Schema naming, patterns
-- `define-database-model.mdc` - Model templates, CRUD patterns
-- `i18n.mdc` - Internationalization workflow
+## Skills (Auto-loaded by Claude)
 
-**State & UI**
-
-- `zustand-slice-organization.mdc` - Store organization
-- `zustand-action-patterns.mdc` - Action patterns
-- `packages/react-layout-kit.mdc` - flex layout components usage
-
-**Testing & Quality**
-
-- `testing-guide/testing-guide.mdc` - Test strategy, mock patterns
-- `code-review.mdc` - Review process and standards
-
-**Desktop (Electron)**
-
-- `desktop-feature-implementation.mdc` - Main/renderer process patterns
-- `desktop-local-tools-implement.mdc` - Tool integration workflow
-- `desktop-menu-configuration.mdc` - App menu, context menu, tray menu
-- `desktop-window-management.mdc` - Window creation, state management, multi-window
-- `desktop-controller-tests.mdc` - Controller unit testing guide
+Claude Code automatically loads relevant skills from `.agents/skills/`.

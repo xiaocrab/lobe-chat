@@ -1,10 +1,10 @@
 'use client';
 
-import { ForwardedRef, memo, useImperativeHandle } from 'react';
+import { type ForwardedRef, memo, useImperativeHandle } from 'react';
 import { createStoreUpdater } from 'zustand-utils';
 
-import { ChatInputEditor, useChatInputEditor } from './hooks/useChatInputEditor';
-import { PublicState, useStoreApi } from './store';
+import { type ChatInputEditor, useChatInputEditor } from './hooks/useChatInputEditor';
+import { type PublicState, useStoreApi } from './store';
 
 export interface StoreUpdaterProps extends Partial<PublicState> {
   chatInputEditorRef?: ForwardedRef<ChatInputEditor | null>;
@@ -12,6 +12,7 @@ export interface StoreUpdaterProps extends Partial<PublicState> {
 
 const StoreUpdater = memo<StoreUpdaterProps>(
   ({
+    agentId,
     chatInputEditorRef,
     mobile,
     sendButtonProps,
@@ -20,15 +21,20 @@ const StoreUpdater = memo<StoreUpdaterProps>(
     onSend,
     onMarkdownContentChange,
     sendMenu,
+    mentionItems,
+    allowExpand,
   }) => {
     const storeApi = useStoreApi();
     const useStoreUpdater = createStoreUpdater(storeApi);
     const editor = useChatInputEditor();
 
-    useStoreUpdater('mobile', mobile);
-    useStoreUpdater('sendMenu', sendMenu);
-    useStoreUpdater('leftActions', leftActions);
-    useStoreUpdater('rightActions', rightActions);
+    useStoreUpdater('agentId', agentId);
+    useStoreUpdater('mobile', mobile!);
+    useStoreUpdater('sendMenu', sendMenu!);
+    useStoreUpdater('mentionItems', mentionItems);
+    useStoreUpdater('leftActions', leftActions!);
+    useStoreUpdater('rightActions', rightActions!);
+    useStoreUpdater('allowExpand', allowExpand);
 
     useStoreUpdater('sendButtonProps', sendButtonProps);
     useStoreUpdater('onSend', onSend);

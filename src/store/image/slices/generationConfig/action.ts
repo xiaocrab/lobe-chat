@@ -1,16 +1,21 @@
 import {
-  AIImageModelCard,
-  ModelParamsSchema,
-  RuntimeImageGenParams,
-  RuntimeImageGenParamsKeys,
-  RuntimeImageGenParamsValue,
+  type AIImageModelCard,
+  type ModelParamsSchema,
+  type RuntimeImageGenParams,
+  type RuntimeImageGenParamsKeys,
+  type RuntimeImageGenParamsValue,
   extractDefaultValues,
 } from 'model-bank';
-import { StateCreator } from 'zustand/vanilla';
+import { type StateCreator } from 'zustand/vanilla';
 
 import { aiProviderSelectors, getAiInfraStoreState } from '@/store/aiInfra';
+import { useGlobalStore } from '@/store/global';
+import { useUserStore } from '@/store/user';
+import { authSelectors } from '@/store/user/selectors';
+import { settingsSelectors } from '@/store/user/slices/settings/selectors';
 
 import type { ImageStore } from '../../store';
+import { calculateInitialAspectRatio } from '../../utils/aspectRatio';
 import { adaptSizeToRatio, parseRatio } from '../../utils/size';
 
 export interface GenerationConfigAction {
@@ -34,6 +39,14 @@ export interface GenerationConfigAction {
   setHeight(height: number): void;
   toggleAspectRatioLock(): void;
   setAspectRatio(aspectRatio: string): void;
+
+  // Initialization related methods
+  _initializeDefaultImageConfig(): void;
+  initializeImageConfig(
+    isLogin?: boolean,
+    lastSelectedImageModel?: string,
+    lastSelectedImageProvider?: string,
+  ): void;
 }
 
 /**
@@ -43,14 +56,43 @@ export interface GenerationConfigAction {
  */
 export function getModelAndDefaults(model: string, provider: string) {
   const enabledImageModelList = aiProviderSelectors.enabledImageModelList(getAiInfraStoreState());
-  const activeModel = enabledImageModelList
-    .find((providerItem) => providerItem.id === provider)
-    ?.children.find((modelItem) => modelItem.id === model) as unknown as AIImageModelCard;
+
+  const providerItem = enabledImageModelList.find((providerItem) => providerItem.id === provider);
+  if (!providerItem) {
+    throw new Error(
+      `Provider "${provider}" not found in enabled image provider list. Available providers: ${enabledImageModelList.map((p) => p.id).join(', ')}`,
+    );
+  }
+
+  const activeModel = providerItem.children.find(
+    (modelItem) => modelItem.id === model,
+  ) as unknown as AIImageModelCard;
+  if (!activeModel) {
+    throw new Error(
+      `Model "${model}" not found in provider "${provider}". Available models: ${providerItem.children.map((m) => m.id).join(', ')}`,
+    );
+  }
 
   const parametersSchema = activeModel.parameters as ModelParamsSchema;
   const defaultValues = extractDefaultValues(parametersSchema);
 
   return { defaultValues, activeModel, parametersSchema };
+}
+
+/**
+ * @internal Helper
+ * Internal utility to derive initial config for a given provider/model.
+ * Not exported; tests should cover through public actions.
+ */
+function prepareModelConfigState(model: string, provider: string) {
+  const { defaultValues, parametersSchema } = getModelAndDefaults(model, provider);
+  const initialActiveRatio = calculateInitialAspectRatio(parametersSchema, defaultValues);
+
+  return {
+    defaultValues,
+    parametersSchema,
+    initialActiveRatio,
+  };
 }
 
 export const createGenerationConfigSlice: StateCreator<
@@ -143,12 +185,12 @@ export const createGenerationConfigSlice: StateCreator<
         } = state;
         const newLockState = !isAspectRatioLocked;
 
-        // 如果是从解锁变为锁定，且有活动的宽高比，则立即调整尺寸
+        // If transitioning from unlocked to locked and there's an active aspect ratio, adjust dimensions immediately
         if (newLockState && activeAspectRatio && parameters && parametersSchema) {
           const currentWidth = parameters.width;
           const currentHeight = parameters.height;
 
-          // 只有当width和height都存在时才进行调整
+          // Only adjust when both width and height exist
           if (
             typeof currentWidth === 'number' &&
             typeof currentHeight === 'number' &&
@@ -158,9 +200,9 @@ export const createGenerationConfigSlice: StateCreator<
             const targetRatio = parseRatio(activeAspectRatio);
             const currentRatio = currentWidth / currentHeight;
 
-            // 如果当前比例与目标比例不匹配，则需要调整
+            // If current ratio doesn't match target ratio, adjustment is needed
             if (Math.abs(currentRatio - targetRatio) > 0.01) {
-              // 允许小误差
+              // Allow small margin of error
               const widthSchema = parametersSchema.width;
               const heightSchema = parametersSchema.height;
 
@@ -172,19 +214,19 @@ export const createGenerationConfigSlice: StateCreator<
                 typeof heightSchema.max === 'number' &&
                 typeof heightSchema.min === 'number'
               ) {
-                // 优先保持宽度，调整高度
+                // Prioritize keeping width, adjust height
                 let newWidth = currentWidth;
                 let newHeight = Math.round(currentWidth / targetRatio);
 
-                // 如果计算出的高度超出范围，则改为保持高度，调整宽度
+                // If calculated height is out of range, switch to keeping height and adjust width
                 if (newHeight > heightSchema.max || newHeight < heightSchema.min) {
                   newHeight = currentHeight;
                   newWidth = Math.round(currentHeight * targetRatio);
 
-                  // 确保宽度也在范围内
+                  // Ensure width is also within range
                   newWidth = Math.max(Math.min(newWidth, widthSchema.max), widthSchema.min);
                 } else {
-                  // 确保高度在范围内
+                  // Ensure height is within range
                   newHeight = Math.max(Math.min(newHeight, heightSchema.max), heightSchema.min);
                 }
 
@@ -211,7 +253,7 @@ export const createGenerationConfigSlice: StateCreator<
     const defaultValues = extractDefaultValues(parametersSchema);
     const newParams = { ...parameters };
 
-    // 如果模型支持 width/height，则计算新尺寸
+    // If model supports width/height, calculate new dimensions
     if (
       parametersSchema?.width &&
       parametersSchema?.height &&
@@ -224,7 +266,7 @@ export const createGenerationConfigSlice: StateCreator<
       newParams.height = height;
     }
 
-    // 如果模型本身支持 aspectRatio，则更新它
+    // If model itself supports aspectRatio, update it
     if (parametersSchema?.aspectRatio) {
       newParams.aspectRatio = aspectRatio;
     }
@@ -237,38 +279,32 @@ export const createGenerationConfigSlice: StateCreator<
   },
 
   setModelAndProviderOnSelect: (model, provider) => {
-    const { defaultValues, activeModel } = getModelAndDefaults(model, provider);
-    const parametersSchema = activeModel.parameters;
-
-    let initialActiveRatio: string | null = null;
-
-    // 如果模型没有原生比例或尺寸参数，但有宽高，则启用虚拟比例控制
-    if (
-      !parametersSchema?.aspectRatio &&
-      !parametersSchema?.size &&
-      parametersSchema?.width &&
-      parametersSchema?.height
-    ) {
-      const { width, height } = defaultValues;
-      if (typeof width === 'number' && typeof height === 'number' && width > 0 && height > 0) {
-        initialActiveRatio = `${width}:${height}`;
-      } else {
-        initialActiveRatio = '1:1';
-      }
-    }
+    const { defaultValues, parametersSchema, initialActiveRatio } = prepareModelConfigState(
+      model,
+      provider,
+    );
 
     set(
       {
         model,
         provider,
         parameters: defaultValues,
-        parametersSchema: parametersSchema,
+        parametersSchema,
         isAspectRatioLocked: false,
         activeAspectRatio: initialActiveRatio,
       },
       false,
       `setModelAndProviderOnSelect/${model}/${provider}`,
     );
+
+    // Only remember last selection for logged-in users, consistent with recovery strategy
+    const isLogin = authSelectors.isLogin(useUserStore.getState());
+    if (isLogin) {
+      useGlobalStore.getState().updateSystemStatus({
+        lastSelectedImageModel: model,
+        lastSelectedImageProvider: provider,
+      });
+    }
   },
 
   setImageNum: (imageNum) => {
@@ -291,5 +327,43 @@ export const createGenerationConfigSlice: StateCreator<
 
   reuseSeed: (seed: number) => {
     set((state) => ({ parameters: { ...state.parameters, seed } }), false, `reuseSeed/${seed}`);
+  },
+
+  _initializeDefaultImageConfig: () => {
+    const { defaultImageNum } = settingsSelectors.currentImageSettings(useUserStore.getState());
+    set({ imageNum: defaultImageNum, isInit: true }, false, 'initializeImageConfig/default');
+  },
+
+  initializeImageConfig: (isLogin, lastSelectedImageModel, lastSelectedImageProvider) => {
+    const { _initializeDefaultImageConfig } = get();
+    const { defaultImageNum } = settingsSelectors.currentImageSettings(useUserStore.getState());
+
+    if (isLogin && lastSelectedImageModel && lastSelectedImageProvider) {
+      try {
+        const { defaultValues, parametersSchema, initialActiveRatio } = prepareModelConfigState(
+          lastSelectedImageModel,
+          lastSelectedImageProvider,
+        );
+
+        set(
+          {
+            model: lastSelectedImageModel,
+            provider: lastSelectedImageProvider,
+            parameters: defaultValues,
+            parametersSchema,
+            isAspectRatioLocked: false,
+            activeAspectRatio: initialActiveRatio,
+            imageNum: defaultImageNum,
+            isInit: true,
+          },
+          false,
+          `initializeImageConfig/${lastSelectedImageModel}/${lastSelectedImageProvider}`,
+        );
+      } catch {
+        _initializeDefaultImageConfig();
+      }
+    } else {
+      _initializeDefaultImageConfig();
+    }
   },
 });
