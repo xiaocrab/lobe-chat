@@ -1,22 +1,20 @@
 'use client';
 
 import { isDesktop } from '@lobechat/const';
-import { type IEditor } from '@lobehub/editor';
+import type { IEditor } from '@lobehub/editor';
 import {
-  ReactCodemirrorPlugin,
-  ReactCodePlugin,
-  ReactHRPlugin,
   ReactImagePlugin,
   ReactLinkPlugin,
-  ReactListPlugin,
   ReactLiteXmlPlugin,
-  ReactMathPlugin,
   ReactTablePlugin,
   ReactToolbarPlugin,
 } from '@lobehub/editor';
 import { Editor, useEditorState } from '@lobehub/editor/react';
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import isEqual from 'fast-deep-equal';
+import { memo, type RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { createChatInputRichPlugins } from '@/features/ChatInput/InputEditor/plugins';
 
 import { type EditorCanvasProps } from './EditorCanvas';
 import InlineToolbar from './InlineToolbar';
@@ -31,16 +29,49 @@ const IMAGE_FILTERS = [
  */
 const STATIC_PLUGINS = [
   ReactLiteXmlPlugin,
-  ReactListPlugin,
-  ReactCodePlugin,
-  ReactCodemirrorPlugin,
-  ReactHRPlugin,
-  ReactLinkPlugin,
+  ...createChatInputRichPlugins({ linkPlugin: ReactLinkPlugin }),
   ReactTablePlugin,
-  ReactMathPlugin,
 ];
 
+const EDITOR_INIT_DATA_SOURCE_TYPES = ['json', 'markdown'] as const;
+const EDITOR_INIT_RETRY_LIMIT = 30;
+const EDITOR_INIT_RETRY_INTERVAL = 16;
+
+interface InspectableEditor extends IEditor {
+  dataTypeMap?: Map<string, unknown> | Record<string, unknown>;
+}
+
+const getEditorDataSourceTypes = (editor: InspectableEditor): string[] => {
+  const dataTypeMap = editor.dataTypeMap;
+
+  if (!dataTypeMap) return [];
+
+  if (dataTypeMap instanceof Map) {
+    return [...dataTypeMap.keys()].sort();
+  }
+
+  return Object.keys(dataTypeMap).sort();
+};
+
+const isEditorInitReady = (editor: IEditor) => {
+  const inspectableEditor = editor as InspectableEditor;
+  const dataSourceTypes = getEditorDataSourceTypes(inspectableEditor);
+
+  return {
+    dataSourceTypes,
+    hasLexicalEditor: !!editor.getLexicalEditor?.(),
+    isReady:
+      !!editor.getLexicalEditor?.() &&
+      EDITOR_INIT_DATA_SOURCE_TYPES.every((type) => dataSourceTypes.includes(type)),
+  };
+};
+
 export interface InternalEditorProps extends EditorCanvasProps {
+  /**
+   * Optional lock ref to suppress content-change callback during programmatic document hydration.
+   */
+  contentChangeLockRef?: RefObject<boolean>;
+
   /**
    * Editor instance (required)
    */
@@ -52,6 +83,7 @@ export interface InternalEditorProps extends EditorCanvasProps {
  */
 const InternalEditor = memo<InternalEditorProps>(
   ({
+    contentChangeLockRef,
     editor,
     extraPlugins,
     floatingToolbar = true,
@@ -135,8 +167,53 @@ const InternalEditor = memo<InternalEditorProps>(
       };
     }, [editor]);
 
+    const onInitRef = useRef(onInit);
+    const initializedEditorRef = useRef<IEditor | null>(null);
+
+    useEffect(() => {
+      onInitRef.current = onInit;
+    }, [onInit]);
+
+    useEffect(() => {
+      if (!onInit) return;
+
+      let retryCount = 0;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      let disposed = false;
+
+      const notifyWhenReady = () => {
+        if (disposed) return;
+
+        const snapshot = isEditorInitReady(editor);
+
+        if (snapshot.isReady) {
+          if (initializedEditorRef.current !== editor) {
+            initializedEditorRef.current = editor;
+            onInitRef.current?.(editor);
+          }
+
+          return;
+        }
+
+        if (retryCount >= EDITOR_INIT_RETRY_LIMIT) {
+          console.warn('[InternalEditor] onInit delayed because editor is not ready:', snapshot);
+          return;
+        }
+
+        retryCount += 1;
+        timer = setTimeout(notifyWhenReady, EDITOR_INIT_RETRY_INTERVAL);
+      };
+
+      notifyWhenReady();
+
+      return () => {
+        disposed = true;
+        if (timer) clearTimeout(timer);
+      };
+    }, [editor, onInit]);
+
     // Use refs for stable references across re-renders
-    const previousContentRef = useRef<string | undefined>(undefined);
+    const previousDocumentSnapshotRef = useRef<unknown>(undefined);
     const onContentChangeRef = useRef(onContentChange);
     onContentChangeRef.current = onContentChange;
 
@@ -148,18 +225,22 @@ const InternalEditor = memo<InternalEditorProps>(
       const lexicalEditor = editor.getLexicalEditor?.();
       if (!lexicalEditor) return;
 
-      // Initialize previousContent with current content before registering listener
-      previousContentRef.current = JSON.stringify(editor.getDocument('text'));
+      // Initialize snapshot before registering listener
+      previousDocumentSnapshotRef.current = editor.getDocument('json');
 
       const unregister = lexicalEditor.registerUpdateListener(({ dirtyElements, dirtyLeaves }) => {
-        // Only process when there are actual content changes
+        // Skip selection-only / caret-movement updates — no content was mutated.
         if (dirtyElements.size === 0 && dirtyLeaves.size === 0) return;
 
-        const currentContent = JSON.stringify(editor.getDocument('text'));
+        const currentDocumentSnapshot = editor.getDocument('json');
 
-        if (currentContent !== previousContentRef.current) {
-          // Content actually changed
-          previousContentRef.current = currentContent;
+        if (!isEqual(currentDocumentSnapshot, previousDocumentSnapshotRef.current)) {
+          previousDocumentSnapshotRef.current = currentDocumentSnapshot;
+
+          // During document hydration (e.g. route switch), we only advance snapshot
+          // and skip external change callback to avoid false dirty checks.
+          if (contentChangeLockRef?.current) return;
+
           onContentChangeRef.current?.();
         }
       });
@@ -167,7 +248,7 @@ const InternalEditor = memo<InternalEditorProps>(
       return () => {
         unregister();
       };
-    }, [editor]); // Only depend on editor, use ref for onContentChange
+    }, [contentChangeLockRef, editor]); // Only depend on stable refs and editor
 
     return (
       <div
@@ -185,10 +266,9 @@ const InternalEditor = memo<InternalEditorProps>(
           slashOption={slashItems ? { items: slashItems } : undefined}
           type={'text'}
           style={{
-            paddingBottom: 64,
+            paddingBottom: 32,
             ...style,
           }}
-          onInit={onInit}
         />
       </div>
     );

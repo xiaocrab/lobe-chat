@@ -3,6 +3,7 @@ import type { LobeRuntimeAI } from '../BaseAI';
 export type ApiType =
   | 'anthropic'
   | 'azure'
+  | 'azureopenai'
   | 'bedrock'
   | 'cloudflare'
   | 'deepseek'
@@ -14,6 +15,8 @@ export type ApiType =
   | 'qwen'
   | 'vertexai'
   | 'volcengine'
-  | 'xai';
+  | 'xai'
+  | 'xiaomimimo'
+  | 'zhipu';
 
 export type RuntimeClass = new (options?: any) => LobeRuntimeAI;

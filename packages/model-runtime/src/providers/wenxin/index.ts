@@ -3,6 +3,8 @@ import { ModelProvider } from 'model-bank';
 import type { OpenAICompatibleFactoryOptions } from '../../core/openaiCompatibleFactory';
 import { createOpenAICompatibleRuntime } from '../../core/openaiCompatibleFactory';
 import { processMultiProviderModelList } from '../../utils/modelParse';
+import { createWenxinImage } from './createImage';
+import { createWenxinVideo } from './createVideo';
 
 export interface WenxinModelCard {
   id: string;
@@ -25,13 +27,22 @@ export const params = {
           },
         }),
         ...(thinking && {
-          enable_thinking: thinking.type !== 'disabled',
+          enable_thinking: thinking.type ? thinking.type !== 'disabled' : undefined,
           ...(thinking?.budget_tokens !== 0 && {
             thinking_budget: Math.min(Math.max(thinking?.budget_tokens, 100), 16_384),
           }),
         }),
       } as any;
     },
+  },
+  createImage: createWenxinImage,
+  createVideo: createWenxinVideo,
+  handlePollVideoStatus: async (inferenceId, options) => {
+    const { pollWenxinVideoStatus } = await import('./createVideo');
+    return pollWenxinVideoStatus(inferenceId, {
+      apiKey: options.apiKey,
+      baseURL: (options.baseURL || '').replace('/v2', ''),
+    });
   },
   debug: {
     chatCompletion: () => process.env.DEBUG_WENXIN_CHAT_COMPLETION === '1',

@@ -17,28 +17,28 @@ const styles = createStaticStyles(({ css, cssVar }) => {
 });
 interface ContentBlockProps {
   content: string;
+  disableStreaming?: boolean;
   hasTools?: boolean;
   id: string;
 }
 
-const MessageContent = memo<ContentBlockProps>(({ content, hasTools, id }) => {
+const MessageContent = memo<ContentBlockProps>(({ content, disableStreaming, hasTools, id }) => {
   const message = normalizeThinkTags(processWithArtifact(content));
-  const markdownProps = useMarkdown(id);
+  const markdownProps = useMarkdown(id, disableStreaming);
 
   if (!content && !hasTools) return <ContentLoading id={id} />;
 
   if (content === LOADING_FLAT) {
+    if (hasTools) return null;
     return <ContentLoading id={id} />;
   }
 
   const isSingleLine = (message || '').split('\n').length <= 2;
+  const isToolSingleLine = hasTools && isSingleLine;
 
   return (
     content && (
-      <MarkdownMessage
-        {...markdownProps}
-        className={cx(hasTools && isSingleLine && styles.pWithTool)}
-      >
+      <MarkdownMessage {...markdownProps} className={cx(isToolSingleLine && styles.pWithTool)}>
         {message}
       </MarkdownMessage>
     )

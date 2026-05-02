@@ -1,12 +1,23 @@
-import { type LobeChatPluginManifest } from '@lobehub/chat-plugin-sdk';
+import { type ToolManifest } from '@lobechat/types';
 import { describe, expect, it } from 'vitest';
 
 import { type ToolStoreState } from '../initialState';
 import { initialState } from '../initialState';
 import { toolSelectors } from './tool';
 
+// Mock builtin skill for testing
+const mockBuiltinSkill = {
+  avatar: '🧪',
+  content: '# Test Skill',
+  description: 'A test skill',
+  identifier: 'test-skill',
+  name: 'Test Skill',
+  source: 'builtin' as const,
+};
+
 const mockState = {
   ...initialState,
+  builtinSkills: [mockBuiltinSkill],
   installedPlugins: [
     {
       identifier: 'plugin-1',
@@ -17,7 +28,7 @@ const mockState = {
         createdAt: '2024-01-01',
         homepage: 'https://example.com/plugin-1',
         meta: { title: 'Plugin 1', description: 'Plugin 1 description' },
-      } as LobeChatPluginManifest,
+      } as ToolManifest,
       runtimeType: 'standalone',
       type: 'plugin',
     },
@@ -28,7 +39,7 @@ const mockState = {
         api: [{ name: 'api-2' }],
         author: 'Another Author',
         homepage: 'https://example.com/plugin-2',
-      } as LobeChatPluginManifest,
+      } as ToolManifest,
       runtimeType: 'default',
       type: 'plugin',
     },
@@ -56,7 +67,7 @@ const mockState = {
         identifier: 'builtin-1',
         api: [{ name: 'builtin-api-1' }],
         meta: { title: 'Builtin 1', description: 'Builtin 1 description' },
-      } as LobeChatPluginManifest,
+      } as ToolManifest,
     },
   ],
   pluginInstallLoading: {
@@ -88,6 +99,12 @@ describe('toolSelectors', () => {
     it('should return the correct list of tool metadata', () => {
       const result = toolSelectors.metaList(mockState);
       expect(result).toEqual([
+        {
+          author: 'LobeHub',
+          identifier: 'test-skill',
+          meta: { avatar: '🧪', description: 'A test skill', title: 'Test Skill' },
+          type: 'builtin',
+        },
         {
           type: 'builtin',
           author: 'LobeHub',

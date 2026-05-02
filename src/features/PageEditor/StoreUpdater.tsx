@@ -3,10 +3,13 @@
 import { memo, useEffect } from 'react';
 import { createStoreUpdater } from 'zustand-utils';
 
+import { documentHistoryQueueService } from '@/services/documentHistoryQueue';
 import { pageAgentRuntime } from '@/store/tool/slices/builtin/executors/lobe-page-agent';
 
 import { type PublicState } from './store';
 import { usePageEditorStore, useStoreApi } from './store';
+
+type PageAgentEditor = NonNullable<Parameters<typeof pageAgentRuntime.setEditor>[0]>;
 
 export interface StoreUpdaterProps extends Partial<PublicState> {
   pageId?: string;
@@ -37,6 +40,7 @@ const StoreUpdater = memo<StoreUpdaterProps>(
 
     const editor = usePageEditorStore((s) => s.editor);
     const initMeta = usePageEditorStore((s) => s.initMeta);
+    const pageAgentEditor = editor as unknown as PageAgentEditor | undefined;
 
     // Update store with props
     useStoreUpdater('documentId', pageId);
@@ -52,17 +56,17 @@ const StoreUpdater = memo<StoreUpdaterProps>(
     // Initialize meta (title/emoji) with dirty tracking
     useEffect(() => {
       initMeta(title, emoji);
-    }, [pageId, title, emoji]);
+    }, [pageId, title, emoji, initMeta]);
 
     // Connect editor to page agent runtime
     useEffect(() => {
-      if (editor) {
-        pageAgentRuntime.setEditor(editor);
+      if (pageAgentEditor) {
+        pageAgentRuntime.setEditor(pageAgentEditor);
       }
       return () => {
         pageAgentRuntime.setEditor(null);
       };
-    }, [editor]);
+    }, [pageAgentEditor]);
 
     // Connect title handlers and document ID to page agent runtime
     useEffect(() => {
@@ -72,10 +76,18 @@ const StoreUpdater = memo<StoreUpdaterProps>(
 
       pageAgentRuntime.setCurrentDocId(pageId);
       pageAgentRuntime.setTitleHandlers(storeApi.getState().setTitle, titleGetter);
+      pageAgentRuntime.setBeforeMutateHandler(() => {
+        documentHistoryQueueService.enqueueEditorSnapshot({
+          documentId: pageId,
+          editor: storeApi.getState().editor,
+        });
+      });
 
       return () => {
         pageAgentRuntime.setCurrentDocId(undefined);
         pageAgentRuntime.setTitleHandlers(null, null);
+        pageAgentRuntime.setBeforeMutateHandler(null);
+        void documentHistoryQueueService.flush();
       };
     }, [pageId, storeApi]);
 

@@ -1,35 +1,36 @@
 import { ENABLE_BUSINESS_FEATURES } from '@lobechat/business-const';
 import { t } from 'i18next';
-import { type StateCreator } from 'zustand';
 
+import { handleGenerationPromptModerationError } from '@/business/client/handleGenerationPromptModerationError';
 import { markUserValidAction } from '@/business/client/markUserValidAction';
 import { message } from '@/components/AntdStaticMethods';
 import { videoService } from '@/services/video';
+import { type StoreSetter } from '@/store/types';
 
 import { type VideoStore } from '../../store';
 import { generationBatchSelectors } from '../generationBatch/selectors';
 import { videoGenerationConfigSelectors } from '../generationConfig/selectors';
 import { generationTopicSelectors } from '../generationTopic';
 
-// ====== action interface ====== //
+type Setter = StoreSetter<VideoStore>;
 
-export interface CreateVideoAction {
-  createVideo: () => Promise<void>;
-  recreateVideo: (generationBatchId: string) => Promise<void>;
-}
+export const createCreateVideoSlice = (set: Setter, get: () => VideoStore, _api?: unknown) =>
+  new CreateVideoActionImpl(set, get, _api);
 
-// ====== action implementation ====== //
+export class CreateVideoActionImpl {
+  readonly #get: () => VideoStore;
+  readonly #set: Setter;
 
-export const createCreateVideoSlice: StateCreator<
-  VideoStore,
-  [['zustand/devtools', never]],
-  [],
-  CreateVideoAction
-> = (set, get) => ({
-  async createVideo() {
-    set({ isCreating: true }, false, 'createVideo/startCreateVideo');
+  constructor(set: Setter, get: () => VideoStore, _api?: unknown) {
+    void _api;
+    this.#set = set;
+    this.#get = get;
+  }
 
-    const store = get();
+  createVideo = async (): Promise<void> => {
+    this.#set({ isCreating: true }, false, 'createVideo/startCreateVideo');
+
+    const store = this.#get();
     const parameters = videoGenerationConfigSelectors.parameters(store);
     const provider = videoGenerationConfigSelectors.provider(store);
     const model = videoGenerationConfigSelectors.model(store);
@@ -52,13 +53,14 @@ export const createCreateVideoSlice: StateCreator<
       'requiresImageUrl' in endImageUrlSchema &&
       endImageUrlSchema.requiresImageUrl &&
       parameters.endImageUrl &&
-      !parameters.imageUrl
+      !parameters.imageUrl &&
+      !parameters.imageUrls?.length
     ) {
       message.warning({
         content: t('generation.validation.endFrameRequiresStartFrame', { ns: 'video' }),
         duration: 3,
       });
-      set({ isCreating: false }, false, 'createVideo/endCreateVideo');
+      this.#set({ isCreating: false }, false, 'createVideo/endCreateVideo');
       return;
     }
 
@@ -84,7 +86,11 @@ export const createCreateVideoSlice: StateCreator<
     try {
       // 3. If it's a new topic, set the creating state after topic creation
       if (isNewTopic) {
-        set({ isCreatingWithNewTopic: true }, false, 'createVideo/startCreateVideoWithNewTopic');
+        this.#set(
+          { isCreatingWithNewTopic: true },
+          false,
+          'createVideo/startCreateVideoWithNewTopic',
+        );
       }
 
       if (ENABLE_BUSINESS_FEATURES) {
@@ -101,35 +107,38 @@ export const createCreateVideoSlice: StateCreator<
 
       // 5. Refresh generation batches to show the new batch
       if (!isNewTopic) {
-        await get().refreshGenerationBatches();
+        await this.#get().refreshGenerationBatches();
       }
 
       // 6. Clear the prompt input after successful video creation
-      set(
+      this.#set(
         (state) => ({
           parameters: { ...state.parameters, prompt: '' },
         }),
         false,
         'createVideo/clearPrompt',
       );
+    } catch (error) {
+      handleGenerationPromptModerationError(error);
+      throw error;
     } finally {
       // 7. Reset all creating states
       if (isNewTopic) {
-        set(
+        this.#set(
           { isCreating: false, isCreatingWithNewTopic: false },
           false,
           'createVideo/endCreateVideoWithNewTopic',
         );
       } else {
-        set({ isCreating: false }, false, 'createVideo/endCreateVideo');
+        this.#set({ isCreating: false }, false, 'createVideo/endCreateVideo');
       }
     }
-  },
+  };
 
-  async recreateVideo(generationBatchId: string) {
-    set({ isCreating: true }, false, 'recreateVideo/start');
+  recreateVideo = async (generationBatchId: string): Promise<void> => {
+    this.#set({ isCreating: true }, false, 'recreateVideo/start');
 
-    const store = get();
+    const store = this.#get();
     const activeGenerationTopicId = generationTopicSelectors.activeGenerationTopicId(store);
     if (!activeGenerationTopicId) {
       throw new Error('No active generation topic');
@@ -149,8 +158,13 @@ export const createCreateVideoSlice: StateCreator<
       });
 
       await store.refreshGenerationBatches();
+    } catch (error) {
+      handleGenerationPromptModerationError(error);
+      throw error;
     } finally {
-      set({ isCreating: false }, false, 'recreateVideo/end');
+      this.#set({ isCreating: false }, false, 'recreateVideo/end');
     }
-  },
-});
+  };
+}
+
+export type CreateVideoAction = Pick<CreateVideoActionImpl, keyof CreateVideoActionImpl>;

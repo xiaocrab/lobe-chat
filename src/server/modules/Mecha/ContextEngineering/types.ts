@@ -1,14 +1,22 @@
 /* eslint-disable perfectionist/sort-interfaces */
 import type {
   AgentBuilderContext,
+  AgentContextDocument,
+  AgentManagementContext,
+  BotPlatformContext,
+  DiscordContext,
   EvalContext,
   FileContent,
   KnowledgeBaseInfo,
   LobeToolManifest,
+  OnboardingContext,
+  SkillMeta,
+  ToolDiscoveryConfig,
+  TopicReferenceItem,
   UserMemoryData,
 } from '@lobechat/context-engine';
 import type { PageContentContext } from '@lobechat/prompts';
-import type { UIChatMessage } from '@lobechat/types';
+import type { RuntimeInitialContext, UIChatMessage } from '@lobechat/types';
 
 /**
  * Model capability checker functions for server-side
@@ -36,6 +44,8 @@ export interface ServerKnowledgeConfig {
  * Tools configuration for server context engineering
  */
 export interface ServerToolsConfig {
+  /** Tool identifiers that must be removed from historical tool calls in this runtime scope */
+  disabledToolIdentifiers?: string[];
   /** Tool manifests with systemRole and API definitions */
   manifests?: LobeToolManifest[];
   /** Enabled tool IDs (kept for compatibility) */
@@ -59,15 +69,30 @@ export interface ServerUserMemoryConfig {
  * instead of fetching from stores
  */
 export interface ServerMessagesEngineParams {
+  /** Additional variable values to merge with defaults (e.g. device paths) */
+  additionalVariables?: Record<string, string>;
+  /** Agent documents to inject into context based on load rules and positions */
+  agentDocuments?: AgentContextDocument[];
+  /** User's timezone for time-related variables (e.g. 'Asia/Shanghai') */
+  userTimezone?: string;
   // ========== Extended contexts ==========
   /** Agent Builder context (optional, for editing agents) */
   agentBuilderContext?: AgentBuilderContext;
+  /** Agent Management context (optional, available models and plugins) */
+  agentManagementContext?: AgentManagementContext;
   // ========== Capability injection ==========
   /** Model capability checkers */
   capabilities?: ServerModelCapabilities;
+  /** Bot platform context for injecting platform capabilities (e.g. markdown support) */
+  botPlatformContext?: BotPlatformContext;
+  /** Discord context for injecting channel/guild info */
+  discordContext?: DiscordContext;
   // ========== Eval context ==========
   /** Eval context for injecting environment prompts into system message */
   evalContext?: EvalContext;
+  // ========== Onboarding context ==========
+  /** Onboarding context for injecting phase guidance and documents */
+  onboardingContext?: OnboardingContext;
 
   // ========== Agent configuration ==========
   /** Whether to enable history message count limit */
@@ -84,6 +109,8 @@ export interface ServerMessagesEngineParams {
   historySummary?: string;
   /** Input template */
   inputTemplate?: string;
+  /** Initial runtime context captured at operation start */
+  initialContext?: RuntimeInitialContext;
   // ========== Knowledge ==========
   /** Knowledge configuration */
   knowledge?: ServerKnowledgeConfig;
@@ -103,9 +130,17 @@ export interface ServerMessagesEngineParams {
   /** System role */
   systemRole?: string;
 
+  // ========== Skills ==========
+  /** Skills configuration for <available_skills> injection */
+  skillsConfig?: { enabledSkills?: SkillMeta[] };
+  /** Tool discovery configuration for <available_tools> injection */
+  toolDiscoveryConfig?: ToolDiscoveryConfig;
   // ========== Tools ==========
   /** Tools configuration */
   toolsConfig?: ServerToolsConfig;
+  // ========== Topic References ==========
+  /** Topic reference summaries to inject into last user message */
+  topicReferences?: TopicReferenceItem[];
   // ========== User memory ==========
   /** User memory configuration */
   userMemory?: ServerUserMemoryConfig;
@@ -115,9 +150,14 @@ export interface ServerMessagesEngineParams {
 
 export {
   type AgentBuilderContext,
+  type AgentContextDocument,
+  type AgentManagementContext,
+  type BotPlatformContext,
+  type DiscordContext,
   type EvalContext,
   type FileContent,
   type KnowledgeBaseInfo,
+  type TopicReferenceItem,
   type UserMemoryData,
 } from '@lobechat/context-engine';
 export type { PageContentContext } from '@lobechat/prompts';

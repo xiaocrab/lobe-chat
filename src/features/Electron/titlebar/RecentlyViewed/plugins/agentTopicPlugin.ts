@@ -1,10 +1,15 @@
 import { MessageSquare } from 'lucide-react';
 
+import { SESSION_CHAT_TOPIC_URL } from '@/const/url';
+import { useChatStore } from '@/store/chat';
+
 import { type AgentTopicParams, type PageReference, type ResolvedPageData } from '../types';
-import { type PluginContext, type RecentlyViewedPlugin } from './types';
+import { buildAgentNewTopicAction } from './newTabHelpers';
+import { type NewTabAction, type PluginContext, type RecentlyViewedPlugin } from './types';
 import { createPageReference } from './types';
 
 const AGENT_PATH_REGEX = /^\/agent\/([^/?]+)$/;
+const AGENT_TOPIC_PATH_REGEX = /^\/agent\/([^/?]+)\/(tpc_[^/?]+)$/;
 
 export const agentTopicPlugin: RecentlyViewedPlugin<'agent-topic'> = {
   checkExists(reference: PageReference<'agent-topic'>, ctx: PluginContext): boolean {
@@ -16,6 +21,13 @@ export const agentTopicPlugin: RecentlyViewedPlugin<'agent-topic'> = {
     return agentMeta !== undefined && Object.keys(agentMeta).length > 0 && topic !== undefined;
   },
 
+  createNewTabAction(
+    reference: PageReference<'agent-topic'>,
+    ctx: PluginContext,
+  ): NewTabAction | null {
+    return buildAgentNewTopicAction(reference.params.agentId, ctx);
+  },
+
   generateId(reference: PageReference<'agent-topic'>): string {
     const { agentId, topicId } = reference.params;
     return `agent-topic:${agentId}:${topicId}`;
@@ -23,7 +35,7 @@ export const agentTopicPlugin: RecentlyViewedPlugin<'agent-topic'> = {
 
   generateUrl(reference: PageReference<'agent-topic'>): string {
     const { agentId, topicId } = reference.params;
-    return `/agent/${agentId}?topic=${topicId}`;
+    return SESSION_CHAT_TOPIC_URL(agentId, topicId);
   },
 
   getDefaultIcon() {
@@ -32,11 +44,27 @@ export const agentTopicPlugin: RecentlyViewedPlugin<'agent-topic'> = {
 
   // Higher priority than agent plugin to match topic URLs first
   matchUrl(pathname: string, searchParams: URLSearchParams): boolean {
-    // Match /agent/:id with topic param
-    return AGENT_PATH_REGEX.test(pathname) && searchParams.has('topic');
+    return (
+      AGENT_TOPIC_PATH_REGEX.test(pathname) ||
+      (AGENT_PATH_REGEX.test(pathname) && searchParams.has('topic'))
+    );
+  },
+
+  onActivate(reference: PageReference<'agent-topic'>) {
+    useChatStore.getState().switchTopic(reference.params.topicId);
   },
 
   parseUrl(pathname: string, searchParams: URLSearchParams): PageReference<'agent-topic'> | null {
+    const pathMatch = pathname.match(AGENT_TOPIC_PATH_REGEX);
+
+    if (pathMatch) {
+      const [, agentId, topicId] = pathMatch;
+      const params: AgentTopicParams = { agentId, topicId };
+      const id = this.generateId({ params } as PageReference<'agent-topic'>);
+
+      return createPageReference('agent-topic', params, id);
+    }
+
     const match = pathname.match(AGENT_PATH_REGEX);
     if (!match) return null;
 
@@ -56,6 +84,7 @@ export const agentTopicPlugin: RecentlyViewedPlugin<'agent-topic'> = {
     const { agentId, topicId } = reference.params;
     const agentMeta = ctx.getAgentMeta(agentId);
     const topic = ctx.getTopic(topicId);
+
     const cached = reference.cached;
 
     const agentExists = agentMeta !== undefined && Object.keys(agentMeta).length > 0;

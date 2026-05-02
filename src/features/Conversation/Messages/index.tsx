@@ -8,6 +8,7 @@ import { type MouseEvent, type ReactNode } from 'react';
 import { memo, Suspense, useCallback } from 'react';
 
 import BubblesLoading from '@/components/BubblesLoading';
+import SafeBoundary from '@/components/ErrorBoundary';
 
 import History from '../components/History';
 import { useChatItemContextMenu } from '../hooks/useChatItemContextMenu';
@@ -15,6 +16,7 @@ import { dataSelectors, messageStateSelectors, useConversationStore } from '../s
 import AgentCouncilMessage from './AgentCouncil';
 import AssistantMessage from './Assistant';
 import AssistantGroupMessage from './AssistantGroup';
+import type { WorkflowExpandLevelDefault } from './AssistantGroup/components/WorkflowCollapse';
 import CompressedGroupMessage from './CompressedGroup';
 import GroupTasksMessage from './GroupTasks';
 import SupervisorMessage from './Supervisor';
@@ -40,6 +42,7 @@ const styles = createStaticStyles(({ css }) => ({
 
 export interface MessageItemProps {
   className?: string;
+  defaultWorkflowExpandLevel?: WorkflowExpandLevelDefault;
   disableEditing?: boolean;
   enableHistoryDivider?: boolean;
   endRender?: ReactNode;
@@ -52,6 +55,7 @@ export interface MessageItemProps {
 const MessageItem = memo<MessageItemProps>(
   ({
     className,
+    defaultWorkflowExpandLevel,
     enableHistoryDivider,
     id,
     endRender,
@@ -128,6 +132,7 @@ const MessageItem = memo<MessageItemProps>(
         case 'assistantGroup': {
           return (
             <AssistantGroupMessage
+              defaultWorkflowExpandLevel={defaultWorkflowExpandLevel}
               disableEditing={disableEditing}
               id={id}
               index={index}
@@ -158,11 +163,11 @@ const MessageItem = memo<MessageItemProps>(
           );
         }
         case 'tasks': {
-          return <TasksMessage id={id} index={index} />;
+          return <TasksMessage id={id} />;
         }
 
         case 'groupTasks': {
-          return <GroupTasksMessage id={id} index={index} />;
+          return <GroupTasksMessage id={id} />;
         }
 
         case 'agentCouncil': {
@@ -179,7 +184,7 @@ const MessageItem = memo<MessageItemProps>(
       }
 
       return null;
-    }, [role, disableEditing, id, index, isLatestItem]);
+    }, [role, defaultWorkflowExpandLevel, disableEditing, id, index, isLatestItem]);
 
     if (!role) return;
 
@@ -191,7 +196,9 @@ const MessageItem = memo<MessageItemProps>(
           data-index={index}
           onContextMenu={onContextMenu}
         >
-          <Suspense fallback={<BubblesLoading />}>{renderContent()}</Suspense>
+          <SafeBoundary variant="alert">
+            <Suspense fallback={<BubblesLoading />}>{renderContent()}</Suspense>
+          </SafeBoundary>
           {endRender}
         </Flexbox>
       </>

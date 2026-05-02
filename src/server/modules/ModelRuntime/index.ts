@@ -1,5 +1,5 @@
 import { type GoogleGenAIOptions } from '@google/genai';
-import { ModelRuntime } from '@lobechat/model-runtime';
+import { ModelRuntime, type ModelRuntimeHooks } from '@lobechat/model-runtime';
 import { LobeVertexAI } from '@lobechat/model-runtime/vertexai';
 import {
   type AWSBedrockKeyVault,
@@ -14,6 +14,7 @@ import {
 import { safeParseJSON } from '@lobechat/utils';
 import { ModelProvider } from 'model-bank';
 
+import { getBusinessModelRuntimeHooks } from '@/business/server/model-runtime';
 import { AiProviderModel } from '@/database/models/aiProvider';
 import { type LobeChatDatabase } from '@/database/type';
 import { getLLMConfig } from '@/envs/llm';
@@ -61,7 +62,7 @@ const resolveRuntimeProvider = (provider: string, sdkType?: string): string => {
  *
  * For custom providers, we use runtimeProvider (sdkType) to determine which fields
  * to include in the payload. This ensures that provider-specific fields like
- * cloudflareBaseURLOrAccountID or azureApiVersion are correctly forwarded.
+ * cloudflareBaseURLOrAccountID are correctly forwarded.
  *
  * @param keyVaults - The keyVaults object from database (already decrypted)
  * @param runtimeProvider - The runtime provider (sdkType) to use for building payload
@@ -91,7 +92,6 @@ export const buildPayloadFromKeyVaults = (
     case ModelProvider.Azure: {
       return {
         apiKey: keyVaults.apiKey,
-        azureApiVersion: keyVaults.apiVersion,
         baseURL: keyVaults.baseURL || keyVaults.endpoint,
         runtimeProvider,
       };
@@ -193,11 +193,10 @@ const getParamsFromPayload = (provider: string, payload: ClientSecretPayload) =>
     }
 
     case ModelProvider.Azure: {
-      const { AZURE_API_KEY, AZURE_API_VERSION, AZURE_ENDPOINT } = llmConfig;
+      const { AZURE_API_KEY, AZURE_ENDPOINT } = llmConfig;
       const apiKey = apiKeyManager.pick(payload?.apiKey || AZURE_API_KEY);
       const baseURL = payload?.baseURL || AZURE_ENDPOINT;
-      const apiVersion = payload?.azureApiVersion || AZURE_API_VERSION;
-      return { apiKey, apiVersion, baseURL };
+      return { apiKey, baseURL };
     }
 
     case ModelProvider.AzureAI: {
@@ -357,6 +356,7 @@ export const initModelRuntimeWithUserPayload = (
   provider: string,
   payload: ClientSecretPayload,
   params: any = {},
+  hooks?: ModelRuntimeHooks,
 ) => {
   const runtimeProvider = payload.runtimeProvider ?? provider;
 
@@ -364,13 +364,17 @@ export const initModelRuntimeWithUserPayload = (
     const vertexOptions = buildVertexOptions(payload, params);
     const runtime = LobeVertexAI.initFromVertexAI(vertexOptions);
 
-    return new ModelRuntime(runtime);
+    return new ModelRuntime(runtime, hooks);
   }
 
-  return ModelRuntime.initializeWithProvider(runtimeProvider, {
-    ...getParamsFromPayload(runtimeProvider, payload),
-    ...params,
-  });
+  return ModelRuntime.initializeWithProvider(
+    runtimeProvider,
+    {
+      ...getParamsFromPayload(runtimeProvider, payload),
+      ...params,
+    },
+    hooks,
+  );
 };
 
 /**
@@ -415,6 +419,9 @@ export const initModelRuntimeFromDB = async (
   const keyVaults = (providerConfig?.keyVaults || {}) as ProviderKeyVaults;
   const payload = buildPayloadFromKeyVaults(keyVaults, runtimeProvider);
 
-  // 4. Initialize ModelRuntime with the payload
-  return initModelRuntimeWithUserPayload(provider, payload);
+  // 4. Get business hooks (billing in cloud, undefined in OSS)
+  const hooks = getBusinessModelRuntimeHooks(userId, provider);
+
+  // 5. Initialize ModelRuntime with the payload and hooks
+  return initModelRuntimeWithUserPayload(provider, payload, { userId }, hooks);
 };

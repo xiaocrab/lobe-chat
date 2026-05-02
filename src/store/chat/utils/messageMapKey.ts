@@ -41,7 +41,7 @@ export interface MessageMapKeyInput {
  * Handles mapping from agentId/threadId to scopeId/subTopicId format
  */
 const toMessageMapContext = (input: MessageMapKeyInput): MessageMapContext => {
-  const { agentId, topicId, threadId, isNew, scope, groupId, subAgentId } = input;
+  const { agentId, topicId, threadId, isNew, groupId, subAgentId, scope } = input;
 
   // If threadId is present and scope is explicitly 'thread', use thread scope
   // Thread scope takes priority when explicitly requested, even with groupId
@@ -85,9 +85,10 @@ const toMessageMapContext = (input: MessageMapKeyInput): MessageMapContext => {
 
   // Default scope (main if not specified)
   // isNew can be used with any scope (main for new topic, thread for new thread with explicit scope)
+  // Note: sub_agent scope uses same key as main scope (same conversation, just different display)
   return {
     isNew,
-    scope: scope ?? 'main',
+    scope: scope === 'sub_agent' ? 'main' : (scope ?? 'main'),
     scopeId: agentId,
     topicId,
   };

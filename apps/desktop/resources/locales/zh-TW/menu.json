@@ -1,5 +1,9 @@
 {
   "common.checkUpdates": "檢查更新...",
+  "common.checkingUpdates": "正在檢查更新...",
+  "common.downloadingUpdate": "正在下載更新...",
+  "common.isLatestVersion": "已是最新版本",
+  "common.restartToUpdate": "重新啟動以完成更新",
   "context.copyImage": "複製圖片",
   "context.copyImageAddress": "複製圖片位址",
   "context.copyLink": "複製連結",
@@ -67,6 +71,7 @@
   "macOS.services": "服務",
   "macOS.unhide": "全部顯示",
   "tray.open": "打開 {{appName}}",
+  "tray.openMiniToolbar": "Quick Composer",
   "tray.quit": "退出",
   "tray.show": "顯示 {{appName}}",
   "view.forceReload": "強制重新載入",

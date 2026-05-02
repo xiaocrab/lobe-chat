@@ -3,7 +3,7 @@ name: zustand
 description: Zustand state management guide. Use when working with store code (src/store/**), implementing actions, managing state, or creating slices. Triggers on Zustand store development, state management questions, or action implementation.
 ---
 
-# LobeChat Zustand State Management
+# LobeHub Zustand State Management
 
 ## Action Type Hierarchy
 
@@ -71,15 +71,18 @@ internal_createTopic: async (params) => {
 **Actions:**
 
 - Public: `createTopic`, `sendMessage`
+
 - Internal: `internal_createTopic`, `internal_updateMessageContent`
+
 - Dispatch: `internal_dispatchTopic`
-- Toggle: `internal_toggleMessageLoading`
+  **State:**
 
-**State:**
+- ID arrays: `topicEditingIds`
 
-- ID arrays: `messageLoadingIds`, `topicEditingIds`
 - Maps: `topicMaps`, `messagesMap`
+
 - Active: `activeTopicId`
+
 - Init flags: `topicsInit`
 
 ## Detailed Guides
